@@ -1,0 +1,17 @@
+<h2 mat-dialog-title>Telefon Numarası Değiştir</h2>
+<mat-dialog-content>
+  <mat-form-field>
+    <mat-label>Telefon Numarası</mat-label>
+    <input matInput type="phoneNumber" [(ngModel)]="data.phoneNumber" />
+  </mat-form-field>
+</mat-dialog-content>
+<mat-dialog-actions>
+  <button mat-button (click)="onNoClick()">İptal</button>
+  <button
+    mat-button
+    [mat-dialog-close]="{phoneNumber: data.phoneNumber, id: data.id}"
+    cdkFocusInitial
+  >
+    Kaydet
+  </button>
+</mat-dialog-actions>

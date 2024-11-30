@@ -1,0 +1,44 @@
+import { Routes } from '@angular/router';
+import { SignInComponent } from './pages/sign-in/sign-in.component';
+import { DashboardComponent } from './pages/dashboard/dashboard.component';
+import { canActivateDashboard, isAlreadySignedIn } from './guards/auth.guard';
+import { EventsComponent } from './pages/dashboard/events/events.component';
+import { UsersComponent } from './pages/dashboard/users/users.component';
+import { MainComponent } from './pages/dashboard/main/main.component';
+import { AnnouncementsComponent } from './pages/announcements/announcements.component';
+
+export const routes: Routes = [
+  {
+    path: '',
+    pathMatch: 'full',
+    redirectTo: '/dashboard',
+  },
+  {
+    path: 'dashboard',
+    component: DashboardComponent,
+    canActivate: [canActivateDashboard],
+    children: [
+      {
+        path: '',
+        component: MainComponent,
+      },
+      {
+        path: 'events',
+        component: EventsComponent,
+      },
+      {
+        path: 'users',
+        component: UsersComponent,
+      },
+      {
+        path: 'announcements',
+        component: AnnouncementsComponent,
+      },
+    ],
+  },
+  {
+    path: 'signIn',
+    component: SignInComponent,
+    canActivate: [isAlreadySignedIn],
+  },
+];
