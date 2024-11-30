@@ -1,0 +1,112 @@
+<mat-dialog-content>
+  <form [formGroup]="eventForm">
+    <mat-form-field appearance="fill">
+      <mat-label>Etkinlik Sahibi</mat-label>
+      <input matInput formControlName="owner" readonly />
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Ad</mat-label>
+      <input matInput formControlName="name" readonly />
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Tarih</mat-label>
+      <input
+        matInput
+        [matDatepicker]="picker"
+        formControlName="date"
+        readonly
+      />
+      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Mekan</mat-label>
+      <input matInput formControlName="place" readonly />
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Type</mat-label>
+      <mat-select formControlName="type" readonly>
+        <mat-option value="meeting">Toplantı</mat-option>
+        <mat-option value="seminar">Seminer</mat-option>
+        <mat-option value="panel">Panel</mat-option>
+        <mat-option value="rally">Miting</mat-option>
+        <mat-option value="socialActivity">Sosyal Aktivite</mat-option>
+        <mat-option value="trainingProgram">Eğitim Programı</mat-option>
+        <mat-option value="conference">Konferans</mat-option>
+        <mat-option value="workshop">Çalıştay</mat-option>
+        <mat-option value="campaignActivity">Kampanya Faaliyeti</mat-option>
+        <mat-option value="aidAndSolidarityEvent"
+          >Yardım ve Dayanışma Etkinliği</mat-option
+        >
+        <mat-option value="pressConference">Basın Toplantısı</mat-option>
+        <mat-option value="networkingEvent">Networking Etkinliği</mat-option>
+        <mat-option value="tripsAndStudyTours"
+          >Geziler ve İnceleme Turları</mat-option
+        >
+        <mat-option value="partyMembersMeeting"
+          >Parti Üyeleri Buluşması</mat-option
+        >
+        <mat-option value="campaignLaunch">Kampanya Lansmanı</mat-option>
+        <mat-option value="ideaWorkshop">Fikir Atölyesi</mat-option>
+        <mat-option value="memorialCeremony">Anma Töreni</mat-option>
+        <mat-option value="fundraisingEvent"
+          >Bağış Toplama Etkinliği</mat-option
+        >
+        <mat-option value="localCommunityMeeting"
+          >Yerel Halk Toplantısı</mat-option
+        >
+        <mat-option value="strategyDevelopmentSession"
+          >Strateji Geliştirme Oturumu</mat-option
+        >
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Amaç</mat-label>
+      <input matInput formControlName="purpose" readonly />
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Katılımcı Sayısı</mat-label>
+      <input matInput formControlName="numberOfParticipants" readonly />
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Önemli Katılımcılar</mat-label>
+      <input matInput formControlName="importantParticipants" readonly />
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Hedef Kitle</mat-label>
+      <input matInput formControlName="focusGroup" readonly />
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Bütçe</mat-label>
+      <input matInput formControlName="budget" readonly />
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Giderler</mat-label>
+      <input matInput formControlName="expenses" readonly />
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Gelirler</mat-label>
+      <input matInput formControlName="revenues" readonly />
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Note</mat-label>
+      <textarea matInput formControlName="notes" readonly></textarea>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions>
+  <button mat-button mat-dialog-close>İptal</button>
+</mat-dialog-actions>

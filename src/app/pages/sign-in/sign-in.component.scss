@@ -1,0 +1,44 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  height: calc(100% - 64px);
+}
+
+.signInCard {
+  width: fit-content;
+  margin: auto;
+}
+
+mat-card-title,
+mat-card-content {
+  display: flex;
+  justify-content: center;
+}
+
+mat-form-field {
+  width: 100%;
+  min-width: 350px;
+}
+
+.signInForm {
+  display: flex;
+  flex-direction: column;
+
+  button {
+    margin-bottom: 8px;
+  }
+}
+
+mat-card-title {
+  img {
+    width: 48px;
+    margin: 12px;
+  }
+}
+
+.error {
+  padding: 16px;
+  width: 100%;
+  color: red;
+}

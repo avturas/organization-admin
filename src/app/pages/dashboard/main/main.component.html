@@ -1,0 +1,74 @@
+<div class="dashboard-content">
+  <!-- First row with three cards -->
+  <div class="row">
+    <mat-card class="example-card">
+      <mat-card-header>
+        <mat-card-title>Toplam Etkinlik Sayısı</mat-card-title>
+      </mat-card-header>
+      <mat-card-content class="total-events-content">
+        <p class="total-events-number">{{ totalEventCounts }}</p>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="example-card">
+      <mat-card-header>
+        <mat-card-title>Geçmiş En Son 5 Etkinlik</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <ul>
+          <li *ngFor="let event of lastFiveEvents">{{ event }}</li>
+        </ul>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="example-card">
+      <mat-card-header>
+        <mat-card-title>Önümüzdeki 5 Etkinlik</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <ul>
+          <li *ngFor="let event of upcomingFiveEvents">{{ event }}</li>
+        </ul>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Second row with two cards -->
+  <div class="row">
+    <mat-card class="example-card">
+      <mat-card-header>
+        <mat-card-title>Aylara Göre Etkinlikler</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <canvas
+          baseChart
+          [datasets]="barChartData"
+          [labels]="barChartLabels"
+          [options]="barChartOptions"
+          [plugins]="barChartPlugins"
+          [legend]="barChartLegend"
+          [type]="barChartType"
+        >
+        </canvas>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Add content for related information -->
+    <mat-card class="example-card">
+      <mat-card-header>
+        <mat-card-title>Çeşidine Göre Etkinlikler</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <canvas
+          baseChart
+          [datasets]="eventTypesData"
+          [labels]="eventTypesLabels"
+          [options]="eventTypesOptions"
+          [legend]="eventTypesLegend"
+          [type]="eventTypesChartType"
+        >
+        </canvas>
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

@@ -1,0 +1,61 @@
+<div class="users-wrapper">
+  <mat-form-field>
+    <mat-label>Filter</mat-label>
+    <input
+      matInput
+      (keyup)="applyFilter($event)"
+      placeholder="Ex. Mia"
+      #input
+    />
+  </mat-form-field>
+
+  <div class="example-container">
+    <mat-table [dataSource]="dataSource" matSort>
+      <!-- ID Column -->
+      <ng-container matColumnDef="uid">
+        <mat-header-cell *matHeaderCellDef mat-sort-header>ID</mat-header-cell>
+        <mat-cell *matCellDef="let row">{{ row.uid }}</mat-cell>
+      </ng-container>
+
+      <!-- Progress Column -->
+      <ng-container matColumnDef="il">
+        <mat-header-cell *matHeaderCellDef mat-sort-header>İl</mat-header-cell>
+        <mat-cell *matCellDef="let row">{{ row.il }}</mat-cell>
+      </ng-container>
+
+      <!-- Name Column -->
+      <ng-container matColumnDef="ilce">
+        <mat-header-cell *matHeaderCellDef mat-sort-header
+          >İlçe</mat-header-cell
+        >
+        <mat-cell *matCellDef="let row">{{ row.ilce }}</mat-cell>
+      </ng-container>
+
+      <!-- Fruit Column -->
+      <ng-container matColumnDef="email">
+        <mat-header-cell *matHeaderCellDef mat-sort-header
+          >Telefon Numarası</mat-header-cell
+        >
+        <mat-cell *matCellDef="let row">{{ row.phoneNumber }}</mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <mat-header-cell *matHeaderCellDef mat-sort-header
+          >Aksiyonlar</mat-header-cell
+        >
+        <mat-cell *matCellDef="let row">
+          <button mat-button>Telefon Numarası Değiştir</button>
+        </mat-cell>
+      </ng-container>
+
+      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+      <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
+    </mat-table>
+
+    <mat-paginator
+      [pageSizeOptions]="[5, 10, 25, 100]"
+      [pageSize]="10"
+      aria-label="Select page of users"
+    ></mat-paginator>
+  </div>
+</div>

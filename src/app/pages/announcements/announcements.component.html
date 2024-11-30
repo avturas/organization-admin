@@ -1,0 +1,78 @@
+<div class="events-wrapper">
+  <div class="table-header">
+    <mat-form-field>
+      <mat-label>Filter</mat-label>
+      <input
+        matInput
+        (keyup)="applyFilter($event)"
+        placeholder="Ex. Mia"
+        #input
+      />
+    </mat-form-field>
+    <button mat-raised-button (click)="onAddNewAnnouncement()">
+      Duyuru Ekle
+    </button>
+  </div>
+
+  <div class="example-contianer">
+    <mat-table #table [dataSource]="dataSource" matSort>
+      <!-- ID Column -->
+      <ng-container matColumnDef="id">
+        <mat-header-cell *matHeaderCellDef mat-sort-header>ID</mat-header-cell>
+        <mat-cell *matCellDef="let row">{{ row.id }}</mat-cell>
+      </ng-container>
+
+      <!-- Progress Column -->
+      <ng-container matColumnDef="title">
+        <mat-header-cell *matHeaderCellDef mat-sort-header>
+          Başlık
+        </mat-header-cell>
+        <mat-cell mat-cell *matCellDef="let row">{{ row.title }}</mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="description">
+        <mat-header-cell *matHeaderCellDef mat-sort-header
+          >Açıklama</mat-header-cell
+        >
+        <mat-cell *matCellDef="let row">{{ row.description }}</mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="date">
+        <mat-header-cell *matHeaderCellDef mat-sort-header
+          >Tarih</mat-header-cell
+        >
+        <mat-cell *matCellDef="let row">{{ formatDate(row.date) }}</mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="actions">
+        <mat-header-cell *matHeaderCellDef mat-sort-header
+          >Aksiyonlar</mat-header-cell
+        >
+        <mat-cell *matCellDef="let row">
+          <div class="action-buttons">
+            <button
+              mat-icon-button
+              color="warn"
+              (click)="deleteAnnouncement($event, row)"
+            >
+              <mat-icon>delete</mat-icon>
+            </button>
+          </div>
+        </mat-cell>
+      </ng-container>
+
+      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+      <mat-row
+        *matRowDef="let row; columns: displayedColumns"
+        class="example-element-row"
+        (click)="openDialog(row)"
+      ></mat-row>
+    </mat-table>
+
+    <mat-paginator
+      [pageSizeOptions]="[5, 10, 25, 100]"
+      [pageSize]="10"
+      aria-label="Select page of users"
+    ></mat-paginator>
+  </div>
+</div>

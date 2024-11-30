@@ -1,0 +1,59 @@
+<mat-toolbar>
+  Parti Yönetim
+  <span class="example-spacer"></span>
+</mat-toolbar>
+<mat-card class="signInCard">
+  <mat-card-title> Parti Yönetim </mat-card-title>
+  <mat-card-content>
+    <div id="recaptcha-container"></div>
+    <div class="signInForm">
+      <mat-form-field appearance="fill">
+        <mat-label>Telefon Numarası</mat-label>
+        <input
+          matInput
+          placeholder="Telefon numarası"
+          [(ngModel)]="phoneNumber"
+          [disabled]="otpSent"
+          minlength="10"
+          maxlength="10"
+        />
+        <mat-hint>Başında 0 olmadan yazınız</mat-hint>
+      </mat-form-field>
+      <div class="button">
+        <button
+          type="submit"
+          (click)="sendOtp()"
+          [disabled]="otpSent || !phoneNumber || phoneNumber.length !== 10"
+          mat-button
+        >
+          Şifre Gönder
+        </button>
+      </div>
+      <mat-form-field>
+        <mat-label>SMS Şifresi</mat-label>
+        <input
+          type="password"
+          matInput
+          placeholder="Password"
+          [(ngModel)]="otp"
+          [disabled]="!otpSent"
+        />
+      </mat-form-field>
+
+      <p *ngIf="error" class="error">
+        {{ error }}
+      </p>
+
+      <div class="button">
+        <button
+          (click)="verifyOtp()"
+          type="submit"
+          mat-button
+          [disabled]="!otpSent"
+        >
+          Giriş Yap
+        </button>
+      </div>
+    </div>
+  </mat-card-content>
+</mat-card>
