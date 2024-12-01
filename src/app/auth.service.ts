@@ -3,72 +3,90 @@ import {
   getAuth,
   RecaptchaVerifier,
   signInWithPhoneNumber,
+  User,
 } from '@angular/fire/auth';
-import { getDocs, getFirestore } from '@angular/fire/firestore';
-import { collection, query, where } from 'firebase/firestore';
-import { Subject } from 'rxjs';
-import { User } from '@angular/fire/auth';
+import {
+  getFirestore,
+  collection,
+  query,
+  where,
+  getDocs,
+  Firestore,
+} from '@angular/fire/firestore';
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  auth = getAuth();
-  user: User | undefined;
+  private auth = getAuth();
+  private firestore: Firestore = getFirestore();
   private recaptchaVerifier!: RecaptchaVerifier;
   private confirmationResult: any;
 
+  user: User | null = null;
   private isAuthenticated = false;
   private isConfirmed = false;
   private authSecretKey = 'Bearer Token';
   private authSecret = '';
-  public isConfirmedChanged = new Subject<{
-    confirmed: boolean;
-  }>();
 
-  constructor() {
-    this.isAuthenticated = !!localStorage.getItem(this.authSecretKey);
-    this.authSecret = localStorage.getItem(this.authSecretKey) || '';
+  public role: string | null = null;
+  public city: string | null = null;
+  public district: string | null = null;
 
+  constructor(private router: Router) {
     this.auth.onAuthStateChanged(async (user) => {
       if (user) {
+        await this.fetchUserRole(user.phoneNumber!);
         this.user = user;
-        this.setAuthSecret(await this.user.getIdToken());
+        this.setAuthSecret(await user.getIdToken());
         this.isAuthenticated = true;
         localStorage.setItem(this.authSecretKey, this.authSecret);
-        const userRef = collection(getFirestore(), 'users');
-        const q = query(
-          userRef,
-          where('phoneNumber', '==', this.user.phoneNumber)
-        );
-        const querySnapshot = await getDocs(q);
-        if (querySnapshot.docs.length === 0) {
-          this.setIsConfirmed(false);
-          this.isConfirmedChanged.next({
-            confirmed: false,
-          });
-        }
-        querySnapshot.forEach(() => {
-          this.setIsConfirmed(true);
 
-          this.isConfirmedChanged.next({
-            confirmed: true,
-          });
-        });
+        try {
+          const confirmed = await this.checkUserConfirmation(user.phoneNumber!);
+          this.setIsConfirmed(confirmed);
+
+          if (confirmed) {
+            this.router.navigate(['/dashboard']);
+          } else {
+            this.router.navigate(['/blocked']);
+          }
+        } catch (error) {
+          console.error('Error checking user confirmation:', error);
+          this.router.navigate(['/error']); // Optional: Redirect to error page
+        }
       } else {
-        localStorage.removeItem(this.authSecretKey);
-        this.isAuthenticated = false;
+        this.clearAuthState();
       }
     });
   }
 
-  initializeRecaptcha(containerId: string) {
-    this.recaptchaVerifier = new RecaptchaVerifier(this.auth, containerId, {
-      size: 'invisible',
-      callback: (response: any) => {
-        console.log('reCAPTCHA solved');
-      },
-    });
+  async fetchUserRole(phoneNumber: string) {
+    const userRef = collection(this.firestore, 'users');
+    const q = query(userRef, where('phoneNumber', '==', phoneNumber));
+    const querySnapshot = await getDocs(q);
+
+    if (!querySnapshot.empty) {
+      const userData = querySnapshot.docs[0].data();
+      this.role = userData['role'];
+      this.city = userData['city'];
+      this.district = userData['district'];
+    } else {
+      console.error('User not found in Firestore.');
+    }
+  }
+
+  getUserRole(): string | null {
+    return this.role;
+  }
+
+  getUserCity(): string | null {
+    return this.city;
+  }
+
+  getUserDistrict(): string | null {
+    return this.district;
   }
 
   async sendOtp(phoneNumber: string): Promise<void> {
@@ -80,7 +98,7 @@ export class AuthService {
       );
       console.log('OTP sent');
     } catch (error) {
-      console.error('Error sending OTP', error);
+      console.error('Error sending OTP:', error);
       throw error;
     }
   }
@@ -94,37 +112,62 @@ export class AuthService {
     try {
       await this.confirmationResult.confirm(otp);
     } catch (error) {
+      console.error('Error verifying OTP:', error);
       throw error;
     }
   }
 
-  setIsConfirmed(confirmed: boolean) {
+  async checkUserConfirmation(phoneNumber: string): Promise<boolean> {
+    const userRef = collection(this.firestore, 'users');
+    const q = query(userRef, where('phoneNumber', '==', phoneNumber));
+    const querySnapshot = await getDocs(q);
+
+    return querySnapshot.docs.length > 0;
+  }
+
+  setIsConfirmed(confirmed: boolean): void {
     this.isConfirmed = confirmed;
   }
 
-  getIsConfirmed() {
+  getIsConfirmed(): boolean {
     return this.isConfirmed;
   }
 
-  setAuthSecret(secret: string) {
+  setAuthSecret(secret: string): void {
     this.authSecret = secret;
   }
 
-  getAuthSecret() {
+  getAuthSecret(): string {
     return this.authSecret;
   }
 
-  getIsAuthenticated() {
+  getIsAuthenticated(): boolean {
     return this.isAuthenticated;
   }
 
-  async getUser() {
+  clearAuthState(): void {
+    localStorage.removeItem(this.authSecretKey);
+    this.isAuthenticated = false;
+    this.isConfirmed = false;
+    this.user = null;
+  }
+
+  async getUser(): Promise<User | null> {
     return this.user;
   }
 
   async logout(): Promise<void> {
-    localStorage.removeItem(this.authSecretKey);
-    this.isAuthenticated = false;
+    this.clearAuthState();
     await this.auth.signOut();
+    this.router.navigate(['/signIn']);
+  }
+
+  initializeRecaptcha(containerId: string): void {
+    this.recaptchaVerifier = new RecaptchaVerifier(this.auth, containerId, {
+      size: 'invisible',
+      callback: (response: any) => {
+        console.log('reCAPTCHA solved');
+      },
+    });
   }
 }

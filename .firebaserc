@@ -2,6 +2,15 @@
   "projects": {
     "default": "parti-admin-69f27"
   },
+  "targets": {
+    "parti-admin-69f27": {
+      "hosting": {
+        "parti-admin-69f27": [
+          "default"
+        ]
+      }
+    }
+  },
   "etags": {},
   "dataconnectEmulatorConfig": {}
 }

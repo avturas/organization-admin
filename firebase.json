@@ -3,7 +3,11 @@
     {
       "target": "parti-admin-69f27",
       "public": "dist/parti-admin/browser",
-      "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+      "ignore": [
+        "firebase.json",
+        "**/.*",
+        "**/node_modules/**"
+      ],
       "rewrites": [
         {
           "source": "**",

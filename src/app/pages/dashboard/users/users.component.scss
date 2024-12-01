@@ -22,3 +22,13 @@ th {
     word-break: break-all;
   }
 }
+
+.table-header {
+  display: flex;
+
+  button {
+    white-space: nowrap;
+    min-height: 54px;
+    margin-left: 12px;
+  }
+}

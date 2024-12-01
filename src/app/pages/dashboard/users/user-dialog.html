@@ -1,0 +1,59 @@
+<mat-dialog-content>
+  <form [formGroup]="userForm">
+    <mat-form-field appearance="fill">
+      <mat-label>Ad</mat-label>
+      <input matInput formControlName="name" />
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Soyad</mat-label>
+      <input matInput formControlName="surname" />
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Email</mat-label>
+      <input matInput formControlName="email" />
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Telefon Numarası</mat-label>
+      <input matInput formControlName="phoneNumber" />
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>İl</mat-label>
+      <mat-select
+        formControlName="city"
+        (selectionChange)="onCityChange($event.value)"
+      >
+        <mat-option *ngFor="let city of sortedCities" [value]="city.key">
+          {{ city.key }} - {{ city.value }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>İlçe</mat-label>
+      <mat-select formControlName="district">
+        <mat-option
+          *ngFor="let district of filteredDistricts"
+          [value]="district"
+        >
+          {{ district }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions>
+  <button mat-button mat-dialog-close>İptal</button>
+  <button
+    mat-button
+    (click)="onSubmit()"
+    cdkFocusInitial
+    [disabled]="userForm.invalid"
+  >
+    Kaydet
+  </button>
+</mat-dialog-actions>
