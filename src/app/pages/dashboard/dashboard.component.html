@@ -12,6 +12,9 @@
     <mat-icon>account_circle</mat-icon>
   </button>
   <mat-menu #userAccountMenu [overlapTrigger]="false" yPosition="below">
+    <p>Your Role: {{ role }}</p>
+    <p *ngIf="city">City: {{ city }}</p>
+    <p *ngIf="district">District: {{ district }}</p>
     <button mat-menu-item disabled>{{ phoneNumber }}</button>
     <button mat-menu-item (click)="logOut()">
       <mat-icon>exit_to_app</mat-icon>Logout
@@ -38,10 +41,6 @@
       <mat-list-item routerLink="./users">
         <mat-icon matListItemIcon>groups</mat-icon>
         <div matListItemTitle>Yönetme Kadrosu</div>
-      </mat-list-item>
-      <mat-list-item routerLink="./users">
-        <mat-icon matListItemIcon>supervisor_account</mat-icon>
-        <div matListItemTitle>Yönetim Kadrosu</div>
       </mat-list-item>
       <mat-list-item routerLink="./events">
         <mat-icon matListItemIcon>calendar_month</mat-icon>

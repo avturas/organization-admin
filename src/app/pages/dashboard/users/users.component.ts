@@ -16,7 +16,13 @@ import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { FormsModule } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  FormsModule,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import {
   MAT_DIALOG_DATA,
   MatDialog,
@@ -27,12 +33,20 @@ import {
   MatDialogTitle,
 } from '@angular/material/dialog';
 import { BreakpointObserver } from '@angular/cdk/layout';
+import { AuthService } from '../../../auth.service';
+import { MatSelectModule } from '@angular/material/select';
+import { CITIES } from '../../../shared/cities';
+import { CommonModule } from '@angular/common';
+import { DISTRICTS } from '../../../shared/districts';
 
 export interface UserData {
   uid: string;
-  il: string;
-  ilce: string;
+  name: string;
+  surname: string;
+  city: string;
+  district: string;
   email: string;
+  phoneNumber: string;
 }
 
 @Component({
@@ -51,7 +65,16 @@ export interface UserData {
   styleUrl: './users.component.scss',
 })
 export class UsersComponent {
-  displayedColumns: string[] = ['uid', 'il', 'ilce', 'email', 'actions'];
+  displayedColumns: string[] = [
+    'uid',
+    'city',
+    'district',
+    'name',
+    'surname',
+    'email',
+    'phoneNumber',
+    'actions',
+  ];
   dataSource: MatTableDataSource<UserData> = new MatTableDataSource();
 
   @ViewChild(MatPaginator) paginator: MatPaginator = new MatPaginator(
@@ -68,26 +91,35 @@ export class UsersComponent {
     breakpointObserver.observe(['(max-width: 600px)']).subscribe((result) => {
       this.displayedColumns = result.matches
         ? ['email', 'actions']
-        : ['uid', 'il', 'ilce', 'email', 'actions'];
+        : [
+            'uid',
+            'city',
+            'district',
+            'name',
+            'surname',
+            'email',
+            'phoneNumber',
+            'actions',
+          ];
     });
   }
 
-  async updateEmail(email: string, id: string) {
-    const userRef = doc(getFirestore(), 'users', id);
+  async updateUser(data: UserData) {
+    const userRef = doc(getFirestore(), 'users', data.uid);
     await updateDoc(userRef, {
-      email,
+      ...data,
     });
     this.getUsers();
   }
 
-  openDialog(id: string): void {
-    const dialogRef = this.dialog.open(ChangeEmailDialog, {
-      data: { id },
+  openDialog(data: UserData): void {
+    const dialogRef = this.dialog.open(UserDialog, {
+      data,
     });
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        this.updateEmail(result.email, result.id);
+        this.updateUser(result);
       }
       console.log(result);
     });
@@ -99,16 +131,36 @@ export class UsersComponent {
     querySnapshot.forEach((doc) => {
       users.push({
         uid: doc.id,
-        il: doc.data()['city'],
-        ilce: doc.data()['district'],
+        city: doc.data()['city'],
+        district: doc.data()['district'],
         email: doc.data()['email'],
+        name: doc.data()['name'],
+        surname: doc.data()['surname'],
+        phoneNumber: doc.data()['phoneNumber'],
       });
     });
     this.dataSource = new MatTableDataSource(users);
   }
 
-  onChangeEmail(id: string) {
-    this.openDialog(id);
+  createEmptyUser(): UserData {
+    return {
+      uid: '',
+      name: '',
+      surname: '',
+      city: '',
+      district: '',
+      email: '',
+      phoneNumber: '',
+    };
+  }
+
+  onAddNewUser() {
+    const emptyUser = this.createEmptyUser();
+    this.openDialog(emptyUser);
+  }
+
+  openUpdateUserDialog(row: UserData) {
+    this.openDialog(row);
   }
 
   ngAfterViewInit() {
@@ -133,7 +185,7 @@ export interface DialogData {
 
 @Component({
   selector: 'dialog-overview-example-dialog',
-  templateUrl: 'phone-dialog.html',
+  templateUrl: 'user-dialog.html',
   standalone: true,
   imports: [
     MatFormFieldModule,
@@ -144,15 +196,60 @@ export interface DialogData {
     MatDialogContent,
     MatDialogActions,
     MatDialogClose,
+    ReactiveFormsModule,
+    MatSelectModule,
+    CommonModule,
+  ],
+  styles: [
+    `
+      form {
+        display: flex;
+        flex-direction: column;
+
+        @media (min-width: 600px) {
+          min-width: 800px;
+        }
+      }
+    `,
   ],
 })
-export class ChangeEmailDialog {
-  constructor(
-    public dialogRef: MatDialogRef<ChangeEmailDialog>,
-    @Inject(MAT_DIALOG_DATA) public data: DialogData
-  ) {}
+export class UserDialog {
+  userForm: FormGroup;
+  districts = DISTRICTS;
+  cities = CITIES;
+  filteredDistricts: string[] = [];
+  sortedCities = Object.entries(CITIES)
+    .sort(([keyA], [keyB]) => Number(keyA) - Number(keyB))
+    .map(([key, value]) => ({ key, value })); // Keep keys sorted numerically
 
-  onNoClick(): void {
-    this.dialogRef.close();
+  constructor(
+    private fb: FormBuilder,
+    public dialogRef: MatDialogRef<UserDialog>,
+    private authService: AuthService,
+    @Inject(MAT_DIALOG_DATA) public data: UserData
+  ) {
+    this.userForm = this.fb.group({
+      uid: [data.uid],
+      name: [data.name, Validators.required],
+      surname: [data.surname, Validators.required],
+      city: [data.surname, Validators.required],
+      district: [data.surname, Validators.required],
+      email: [data.surname, [Validators.required, Validators.email]],
+      phoneNumber: [data.phoneNumber, Validators.required],
+    });
+  }
+
+  onCityChange(selectedCity: string): void {
+    const cityName = this.cities[selectedCity];
+    this.filteredDistricts = cityName ? this.districts[cityName] || [] : [];
+    this.userForm.controls['district'].reset();
+  }
+
+  onSubmit(): void {
+    if (this.userForm.valid) {
+      const formValue = this.userForm.value;
+      formValue.date = formValue.date.toISOString();
+      this.dialogRef.close(this.userForm.value);
+    }
   }
 }

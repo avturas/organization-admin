@@ -1,13 +1,16 @@
 <div class="users-wrapper">
-  <mat-form-field>
-    <mat-label>Filter</mat-label>
-    <input
-      matInput
-      (keyup)="applyFilter($event)"
-      placeholder="Ex. Mia"
-      #input
-    />
-  </mat-form-field>
+  <div class="table-header">
+    <mat-form-field>
+      <mat-label>Filter</mat-label>
+      <input
+        matInput
+        (keyup)="applyFilter($event)"
+        placeholder="Ex. Mia"
+        #input
+      />
+    </mat-form-field>
+    <button mat-raised-button (click)="onAddNewUser()">Kullanıcı Ekle</button>
+  </div>
 
   <div class="example-container">
     <mat-table [dataSource]="dataSource" matSort>
@@ -17,22 +20,41 @@
         <mat-cell *matCellDef="let row">{{ row.uid }}</mat-cell>
       </ng-container>
 
+      <ng-container matColumnDef="name">
+        <mat-header-cell *matHeaderCellDef mat-sort-header>Ad</mat-header-cell>
+        <mat-cell *matCellDef="let row">{{ row.name }}</mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="surname">
+        <mat-header-cell *matHeaderCellDef mat-sort-header
+          >Soyad</mat-header-cell
+        >
+        <mat-cell *matCellDef="let row">{{ row.surname }}</mat-cell>
+      </ng-container>
+
       <!-- Progress Column -->
-      <ng-container matColumnDef="il">
+      <ng-container matColumnDef="city">
         <mat-header-cell *matHeaderCellDef mat-sort-header>İl</mat-header-cell>
-        <mat-cell *matCellDef="let row">{{ row.il }}</mat-cell>
+        <mat-cell *matCellDef="let row">{{ row.city }}</mat-cell>
       </ng-container>
 
       <!-- Name Column -->
-      <ng-container matColumnDef="ilce">
+      <ng-container matColumnDef="district">
         <mat-header-cell *matHeaderCellDef mat-sort-header
           >İlçe</mat-header-cell
         >
-        <mat-cell *matCellDef="let row">{{ row.ilce }}</mat-cell>
+        <mat-cell *matCellDef="let row">{{ row.district }}</mat-cell>
       </ng-container>
 
       <!-- Fruit Column -->
       <ng-container matColumnDef="email">
+        <mat-header-cell *matHeaderCellDef mat-sort-header
+          >Email</mat-header-cell
+        >
+        <mat-cell *matCellDef="let row">{{ row.email }}</mat-cell>
+      </ng-container>
+
+      <ng-container matColumnDef="phoneNumber">
         <mat-header-cell *matHeaderCellDef mat-sort-header
           >Telefon Numarası</mat-header-cell
         >
@@ -44,7 +66,9 @@
           >Aksiyonlar</mat-header-cell
         >
         <mat-cell *matCellDef="let row">
-          <button mat-button>Telefon Numarası Değiştir</button>
+          <button mat-button (click)="openUpdateUserDialog(row)">
+            Düzenle
+          </button>
         </mat-cell>
       </ng-container>
 

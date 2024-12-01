@@ -6,6 +6,8 @@ import { EventsComponent } from './pages/dashboard/events/events.component';
 import { UsersComponent } from './pages/dashboard/users/users.component';
 import { MainComponent } from './pages/dashboard/main/main.component';
 import { AnnouncementsComponent } from './pages/announcements/announcements.component';
+import { BlockedComponent } from './pages/blocked/blocked.component';
+import { roleGuard } from './guards/role.guard';
 
 export const routes: Routes = [
   {
@@ -13,10 +15,11 @@ export const routes: Routes = [
     pathMatch: 'full',
     redirectTo: '/dashboard',
   },
+  { path: 'blocked', component: BlockedComponent },
   {
     path: 'dashboard',
     component: DashboardComponent,
-    canActivate: [canActivateDashboard],
+    canActivate: [canActivateDashboard, roleGuard],
     children: [
       {
         path: '',
