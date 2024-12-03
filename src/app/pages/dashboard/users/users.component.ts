@@ -1,48 +1,34 @@
-import { ChangeDetectorRef, Component, Inject, ViewChild } from '@angular/core';
 import {
   collection,
   getDocs,
   getFirestore,
+  query,
+  where,
   doc,
   updateDoc,
+  Query,
+  DocumentData,
+  addDoc,
+  deleteDoc,
 } from '@angular/fire/firestore';
-import {
-  MatPaginator,
-  MatPaginatorIntl,
-  MatPaginatorModule,
-} from '@angular/material/paginator';
+import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
+import { Component, ViewChild } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
+import { AuthService } from '../../../auth.service';
+import { UserDialog } from './user-dialog.component';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import {
-  FormBuilder,
-  FormGroup,
-  FormsModule,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
-import {
-  MAT_DIALOG_DATA,
-  MatDialog,
-  MatDialogActions,
-  MatDialogClose,
-  MatDialogContent,
-  MatDialogRef,
-  MatDialogTitle,
-} from '@angular/material/dialog';
-import { BreakpointObserver } from '@angular/cdk/layout';
-import { AuthService } from '../../../auth.service';
-import { MatSelectModule } from '@angular/material/select';
-import { CITIES } from '../../../shared/cities';
-import { CommonModule } from '@angular/common';
-import { DISTRICTS } from '../../../shared/districts';
+import { FormsModule } from '@angular/forms';
+import { DeleteConfirmationDialog } from './delete-confirmation-dialog.component';
 
 export interface UserData {
   uid: string;
   name: string;
   surname: string;
+  role: string;
   city: string;
   district: string;
   email: string;
@@ -62,7 +48,7 @@ export interface UserData {
     FormsModule,
   ],
   templateUrl: './users.component.html',
-  styleUrl: './users.component.scss',
+  styleUrls: ['./users.component.scss'],
 })
 export class UsersComponent {
   displayedColumns: string[] = [
@@ -75,92 +61,44 @@ export class UsersComponent {
     'phoneNumber',
     'actions',
   ];
-  dataSource: MatTableDataSource<UserData> = new MatTableDataSource();
+  dataSource = new MatTableDataSource<UserData>();
 
-  @ViewChild(MatPaginator) paginator: MatPaginator = new MatPaginator(
-    new MatPaginatorIntl(),
-    ChangeDetectorRef.prototype
-  );
-  @ViewChild(MatSort) sort: MatSort = new MatSort();
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild(MatSort) sort!: MatSort;
 
-  constructor(
-    public dialog: MatDialog,
-    breakpointObserver: BreakpointObserver
-  ) {
-    this.getUsers();
-    breakpointObserver.observe(['(max-width: 600px)']).subscribe((result) => {
-      this.displayedColumns = result.matches
-        ? ['email', 'actions']
-        : [
-            'uid',
-            'city',
-            'district',
-            'name',
-            'surname',
-            'email',
-            'phoneNumber',
-            'actions',
-          ];
-    });
+  constructor(private dialog: MatDialog, private authService: AuthService) {}
+
+  ngOnInit(): void {
+    this.fetchUsers();
   }
 
-  async updateUser(data: UserData) {
-    const userRef = doc(getFirestore(), 'users', data.uid);
-    await updateDoc(userRef, {
-      ...data,
-    });
-    this.getUsers();
-  }
+  async fetchUsers() {
+    const userRole = this.authService.getUserRole();
+    const userCity = this.authService.getUserCity();
+    const userDistrict = this.authService.getUserDistrict();
 
-  openDialog(data: UserData): void {
-    const dialogRef = this.dialog.open(UserDialog, {
-      data,
-    });
+    let userQuery: Query<DocumentData>;
+    const usersCollection = collection(getFirestore(), 'users');
 
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result) {
-        this.updateUser(result);
-      }
-      console.log(result);
-    });
-  }
+    if (userRole === 'city') {
+      userQuery = query(usersCollection, where('city', '==', userCity));
+    } else if (userRole === 'district') {
+      userQuery = query(
+        usersCollection,
+        where('city', '==', userCity),
+        where('district', '==', userDistrict)
+      );
+    } else {
+      userQuery = usersCollection;
+    }
 
-  async getUsers() {
-    const users: UserData[] = [];
-    const querySnapshot = await getDocs(collection(getFirestore(), 'users'));
-    querySnapshot.forEach((doc) => {
-      users.push({
-        uid: doc.id,
-        city: doc.data()['city'],
-        district: doc.data()['district'],
-        email: doc.data()['email'],
-        name: doc.data()['name'],
-        surname: doc.data()['surname'],
-        phoneNumber: doc.data()['phoneNumber'],
-      });
-    });
-    this.dataSource = new MatTableDataSource(users);
-  }
+    const querySnapshot = await getDocs(userQuery);
+    const users = querySnapshot.docs.map((doc) => ({
+      uid: doc.id,
+      ...doc.data(),
+    })) as UserData[];
 
-  createEmptyUser(): UserData {
-    return {
-      uid: '',
-      name: '',
-      surname: '',
-      city: '',
-      district: '',
-      email: '',
-      phoneNumber: '',
-    };
-  }
-
-  onAddNewUser() {
-    const emptyUser = this.createEmptyUser();
-    this.openDialog(emptyUser);
-  }
-
-  openUpdateUserDialog(row: UserData) {
-    this.openDialog(row);
+    this.dataSource.data = users;
   }
 
   ngAfterViewInit() {
@@ -176,80 +114,79 @@ export class UsersComponent {
       this.dataSource.paginator.firstPage();
     }
   }
-}
 
-export interface DialogData {
-  id: string;
-  phoneNumber: string;
-}
+  onAddNewUser(): void {
+    const emptyUser = this.createEmptyUser();
+    this.openDialog(emptyUser);
+  }
 
-@Component({
-  selector: 'dialog-overview-example-dialog',
-  templateUrl: 'user-dialog.html',
-  standalone: true,
-  imports: [
-    MatFormFieldModule,
-    MatInputModule,
-    FormsModule,
-    MatButtonModule,
-    MatDialogTitle,
-    MatDialogContent,
-    MatDialogActions,
-    MatDialogClose,
-    ReactiveFormsModule,
-    MatSelectModule,
-    CommonModule,
-  ],
-  styles: [
-    `
-      form {
-        display: flex;
-        flex-direction: column;
+  openDialog(data: UserData): void {
+    const dialogRef = this.dialog.open(UserDialog, {
+      width: '400px',
+      data,
+    });
 
-        @media (min-width: 600px) {
-          min-width: 800px;
+    dialogRef.afterClosed().subscribe(async (result) => {
+      if (result) {
+        try {
+          if (data.uid) {
+            await this.updateUser(result);
+          } else {
+            delete result.uid;
+            await this.addUserToFirestore(result);
+          }
+          this.fetchUsers();
+        } catch (error) {
+          console.error('Error saving user:', error);
         }
       }
-    `,
-  ],
-})
-export class UserDialog {
-  userForm: FormGroup;
-  districts = DISTRICTS;
-  cities = CITIES;
-  filteredDistricts: string[] = [];
-  sortedCities = Object.entries(CITIES)
-    .sort(([keyA], [keyB]) => Number(keyA) - Number(keyB))
-    .map(([key, value]) => ({ key, value })); // Keep keys sorted numerically
-
-  constructor(
-    private fb: FormBuilder,
-    public dialogRef: MatDialogRef<UserDialog>,
-    private authService: AuthService,
-    @Inject(MAT_DIALOG_DATA) public data: UserData
-  ) {
-    this.userForm = this.fb.group({
-      uid: [data.uid],
-      name: [data.name, Validators.required],
-      surname: [data.surname, Validators.required],
-      city: [data.surname, Validators.required],
-      district: [data.surname, Validators.required],
-      email: [data.surname, [Validators.required, Validators.email]],
-      phoneNumber: [data.phoneNumber, Validators.required],
     });
   }
 
-  onCityChange(selectedCity: string): void {
-    const cityName = this.cities[selectedCity];
-    this.filteredDistricts = cityName ? this.districts[cityName] || [] : [];
-    this.userForm.controls['district'].reset();
+  openUpdateUserDialog(row: UserData): void {
+    this.openDialog(row);
   }
 
-  onSubmit(): void {
-    if (this.userForm.valid) {
-      const formValue = this.userForm.value;
-      formValue.date = formValue.date.toISOString();
-      this.dialogRef.close(this.userForm.value);
-    }
+  private async addUserToFirestore(user: Omit<UserData, 'uid'>): Promise<void> {
+    const firestore = getFirestore();
+    const usersCollection = collection(firestore, 'users');
+    await addDoc(usersCollection, user);
+  }
+
+  async updateUser(data: UserData) {
+    const userRef = doc(getFirestore(), 'users', data.uid);
+    const updateData: { [key: string]: any } = { ...data };
+    await updateDoc(userRef, updateData);
+    this.fetchUsers();
+  }
+
+  onDeleteUser(user: UserData): void {
+    const dialogRef = this.dialog.open(DeleteConfirmationDialog);
+
+    dialogRef.afterClosed().subscribe(async (confirmed) => {
+      if (confirmed) {
+        try {
+          const userRef = doc(getFirestore(), 'users', user.uid);
+          await deleteDoc(userRef);
+          this.fetchUsers();
+          console.log(`User with UID: ${user.uid} deleted successfully`);
+        } catch (error) {
+          console.error('Error deleting user:', error);
+        }
+      }
+    });
+  }
+
+  createEmptyUser(): UserData {
+    return {
+      uid: '',
+      name: '',
+      role: '',
+      surname: '',
+      city: '',
+      district: '',
+      email: '',
+      phoneNumber: '',
+    };
   }
 }

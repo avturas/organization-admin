@@ -7,7 +7,7 @@ export const roleGuard: CanActivateFn = (route, state) => {
   const router = inject(Router);
 
   const role = authService.getUserRole();
-  if (role === 'headquarters') {
+  if (role === 'headquarters' || role === 'city' || role === 'district') {
     return true;
   }
 
