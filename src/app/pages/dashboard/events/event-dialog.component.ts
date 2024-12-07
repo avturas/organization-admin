@@ -1,4 +1,10 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  Inject,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import {
   MatDialogRef,
@@ -13,9 +19,16 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule } from '@angular/material/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
+import {
+  getStorage,
+  ref,
+  uploadBytesResumable,
+  getDownloadURL,
+} from 'firebase/storage';
 import { CITIES } from '../../../shared/cities';
 import { AuthService } from '../../../auth.service';
 import { DISTRICTS } from '../../../shared/districts';
+import { MatIconModule } from '@angular/material/icon';
 
 export interface EventData {
   id?: string;
@@ -35,6 +48,7 @@ export interface EventData {
   expenses?: string;
   revenues?: string;
   notes?: string;
+  imageUrl: string;
 }
 
 const EVENT_TYPE_OWNER_TEXT = {
@@ -57,6 +71,7 @@ const EVENT_TYPE_OWNER_TEXT = {
     MatDialogModule,
     MatDatepickerModule,
     MatNativeDateModule,
+    MatIconModule,
   ],
   templateUrl: './event-dialog.html',
   styleUrls: ['./event-dialog.scss'],
@@ -73,6 +88,10 @@ export class EventDialogComponent implements OnInit {
   availableEventTypes: string[] = [];
   showCityField = false;
   showDistrictField = false;
+  selectedFile: File | null = null;
+  imagePreview: string | null = null;
+  uploadProgress: number | null | undefined = null;
+  @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
   constructor(
     private fb: FormBuilder,
@@ -120,6 +139,7 @@ export class EventDialogComponent implements OnInit {
       expenses: [this.data?.event?.expenses || ''],
       revenues: [this.data?.event?.revenues || ''],
       notes: [this.data?.event?.notes || ''],
+      imageUrl: [this.data?.event?.imageUrl || ''],
     });
 
     this.onTypeChange(this.eventForm.controls['type'].value);
@@ -130,6 +150,23 @@ export class EventDialogComponent implements OnInit {
 
     if (this.readonlyMode) {
       this.eventForm.disable();
+    }
+  }
+
+  triggerFileInput(): void {
+    this.fileInput.nativeElement.click();
+  }
+
+  onFileSelected(event: Event): void {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (file) {
+      this.selectedFile = file;
+
+      const reader = new FileReader();
+      reader.onload = () => {
+        this.imagePreview = reader.result as string;
+      };
+      reader.readAsDataURL(file);
     }
   }
 
@@ -182,15 +219,35 @@ export class EventDialogComponent implements OnInit {
     this.eventForm.controls['district'].reset();
   }
 
-  onSubmit(): void {
-    if (this.eventForm.valid && !this.readonlyMode) {
-      const formValue = this.eventForm.value;
+  async onSubmit(): Promise<void> {
+    if (this.eventForm.valid && this.selectedFile) {
+      const storage = getStorage();
+      const filePath = `events/${Date.now()}_${this.selectedFile.name}`;
+      const fileRef = ref(storage, filePath);
+      const formValue = { ...this.eventForm.value };
 
       if (formValue.date) {
         formValue.date = new Date(formValue.date).toISOString();
       }
 
-      this.dialogRef.close(formValue);
+      const uploadTask = uploadBytesResumable(fileRef, this.selectedFile);
+
+      uploadTask.on(
+        'state_changed',
+        (snapshot) => {
+          this.uploadProgress =
+            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+        },
+        (error) => {
+          console.error('File upload error:', error);
+        },
+        async () => {
+          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+          formValue.imageUrl = downloadURL;
+          this.dialogRef.close(formValue);
+        }
+      );
+    } else {
       this.dialogRef.close(this.eventForm.value);
     }
   }
