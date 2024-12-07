@@ -18,6 +18,13 @@ import {
   Query,
   DocumentData,
 } from '@angular/fire/firestore';
+import {
+  getStorage,
+  ref,
+  uploadBytesResumable,
+  getDownloadURL,
+  deleteObject,
+} from 'firebase/storage';
 import { MatDialog } from '@angular/material/dialog';
 import { addDoc, deleteDoc, doc, updateDoc } from '@firebase/firestore';
 import { EventDialogComponent } from './event-dialog.component';
@@ -29,6 +36,7 @@ export interface EventData {
   city: string;
   district: string;
   owner: string;
+  imageUrl?: string;
 }
 
 @Component({
@@ -102,6 +110,17 @@ export class EventsComponent implements OnInit {
     });
   }
 
+  async deleteImageFromStorage(imageUrl: string): Promise<void> {
+    try {
+      const storage = getStorage();
+      const fileRef = ref(storage, imageUrl);
+      await deleteObject(fileRef);
+      console.log('Old image deleted successfully');
+    } catch (error) {
+      console.error('Error deleting old image:', error);
+    }
+  }
+
   async onChangeEvent(event: Event, row: EventData): Promise<void> {
     event.stopPropagation();
     const dialogRef = this.dialog.open(EventDialogComponent, {
@@ -115,6 +134,10 @@ export class EventsComponent implements OnInit {
           const firestore = getFirestore();
           const eventRef = doc(firestore, 'events', row.id);
           await updateDoc(eventRef, result);
+
+          if (row.imageUrl && result.imageUrl !== row.imageUrl) {
+            await this.deleteImageFromStorage(row.imageUrl);
+          }
           this.getEvents();
         } catch (error) {
           console.error('Error updating event:', error);
@@ -130,6 +153,9 @@ export class EventsComponent implements OnInit {
         const firestore = getFirestore();
         const eventRef = doc(firestore, 'events', row.id);
         await deleteDoc(eventRef);
+        if (row.imageUrl) {
+          await this.deleteImageFromStorage(row.imageUrl);
+        }
         this.getEvents();
       } catch (error) {
         console.error('Error deleting event:', error);

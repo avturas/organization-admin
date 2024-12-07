@@ -144,6 +144,33 @@
       <mat-label>Notlar</mat-label>
       <textarea matInput formControlName="notes"></textarea>
     </mat-form-field>
+
+    <div class="file-input-wrapper">
+      <button
+        mat-raised-button
+        class="file-input-label"
+        (click)="triggerFileInput()"
+      >
+        <mat-icon>file_upload</mat-icon>
+        <span>Etkinlik Görseli Seç</span>
+      </button>
+      <input
+        #fileInput
+        type="file"
+        (change)="onFileSelected($event)"
+        accept="image/*"
+        style="display: none"
+      />
+      <span *ngIf="imagePreview" class="file-preview">Görsel Yüklendi!</span>
+    </div>
+
+    <div *ngIf="imagePreview" class="image-preview">
+      <img [src]="imagePreview" alt="Selected Image" />
+    </div>
+
+    <div *ngIf="data.event.imageUrl && !imagePreview" class="image-preview">
+      <img [src]="data.event.imageUrl" alt="Selected Image" />
+    </div>
   </form>
 </mat-dialog-content>
 
@@ -153,7 +180,7 @@
     mat-button
     (click)="onSubmit()"
     cdkFocusInitial
-    [disabled]="eventForm.invalid"
+    [disabled]="eventForm.invalid || (!selectedFile && !imagePreview)"
   >
     Kaydet
   </button>
