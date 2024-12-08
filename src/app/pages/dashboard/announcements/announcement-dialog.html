@@ -3,11 +3,17 @@
     <mat-form-field appearance="fill">
       <mat-label>Başlık</mat-label>
       <input matInput formControlName="title" />
+      <mat-error *ngIf="announcementForm.controls['title'].invalid">
+        Başlık gereklidir.
+      </mat-error>
     </mat-form-field>
 
     <mat-form-field appearance="fill">
       <mat-label>Açıklama</mat-label>
-      <input matInput formControlName="description" maxlength="300" />
+      <textarea matInput formControlName="description" rows="5"></textarea>
+      <mat-error *ngIf="announcementForm.controls['description'].invalid">
+        Açıklama gereklidir.
+      </mat-error>
     </mat-form-field>
 
     <mat-form-field appearance="fill">
@@ -15,6 +21,51 @@
       <input matInput [matDatepicker]="picker" formControlName="date" />
       <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
       <mat-datepicker #picker></mat-datepicker>
+      <mat-error *ngIf="announcementForm.controls['date'].invalid">
+        Tarih gereklidir.
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Hedef Kitle Türü</mat-label>
+      <mat-select formControlName="audienceType">
+        <mat-option
+          *ngFor="let option of availableAudienceTypes"
+          [value]="option.value"
+        >
+          {{ option.label }}
+        </mat-option>
+      </mat-select>
+      <mat-error *ngIf="announcementForm.controls['audienceType'].invalid">
+        Hedef Kitle Türü gereklidir.
+      </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="fill" *ngIf="showCityField">
+      <mat-label>Şehir</mat-label>
+      <mat-select
+        formControlName="city"
+        (selectionChange)="onCityChange($event.value)"
+      >
+        <mat-option *ngFor="let city of availableCities" [value]="city.value">
+          {{ city.key }} - {{ city.value }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field *ngIf="showDistrictField" appearance="fill">
+      <mat-label>İlçe</mat-label>
+      <mat-select formControlName="district">
+        <mat-option
+          *ngFor="let district of filteredDistricts"
+          [value]="district"
+        >
+          {{ district }}
+        </mat-option>
+      </mat-select>
+      <mat-error *ngIf="announcementForm.controls['district'].invalid">
+        İlçe gereklidir.
+      </mat-error>
     </mat-form-field>
   </form>
 </mat-dialog-content>
@@ -23,6 +74,7 @@
   <button mat-button mat-dialog-close>İptal</button>
   <button
     mat-button
+    color="primary"
     (click)="onSubmit()"
     cdkFocusInitial
     [disabled]="announcementForm.invalid"
