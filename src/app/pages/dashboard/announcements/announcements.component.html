@@ -1,4 +1,4 @@
-<div class="events-wrapper">
+<div class="announcements-wrapper">
   <div class="table-header">
     <mat-form-field>
       <mat-label>Filter</mat-label>
@@ -10,11 +10,11 @@
       />
     </mat-form-field>
     <button mat-raised-button (click)="onAddNewAnnouncement()">
-      Duyuru Ekle
+      Etkinlik Ekle
     </button>
   </div>
 
-  <div class="example-contianer">
+  <div class="table-container">
     <mat-table #table [dataSource]="dataSource" matSort>
       <!-- ID Column -->
       <ng-container matColumnDef="id">
@@ -22,57 +22,64 @@
         <mat-cell *matCellDef="let row">{{ row.id }}</mat-cell>
       </ng-container>
 
-      <!-- Progress Column -->
+      <!-- Title Column -->
       <ng-container matColumnDef="title">
+        <mat-header-cell *matHeaderCellDef mat-sort-header
+          >Başlık</mat-header-cell
+        >
+        <mat-cell *matCellDef="let row">{{ row.title }}</mat-cell>
+      </ng-container>
+
+      <!-- Audience Type Column -->
+      <ng-container matColumnDef="audienceType">
         <mat-header-cell *matHeaderCellDef mat-sort-header>
-          Başlık
+          Hedef Kitle
         </mat-header-cell>
-        <mat-cell mat-cell *matCellDef="let row">{{ row.title }}</mat-cell>
+        <mat-cell *matCellDef="let row">{{
+          getAudienceText(row.audienceType)
+        }}</mat-cell>
       </ng-container>
 
-      <ng-container matColumnDef="description">
-        <mat-header-cell *matHeaderCellDef mat-sort-header
-          >Açıklama</mat-header-cell
-        >
-        <mat-cell *matCellDef="let row">{{ row.description }}</mat-cell>
-      </ng-container>
-
+      <!-- Date Column -->
       <ng-container matColumnDef="date">
-        <mat-header-cell *matHeaderCellDef mat-sort-header
-          >Tarih</mat-header-cell
-        >
+        <mat-header-cell *matHeaderCellDef mat-sort-header>
+          Tarih
+        </mat-header-cell>
         <mat-cell *matCellDef="let row">{{ formatDate(row.date) }}</mat-cell>
       </ng-container>
 
+      <!-- Actions Column -->
       <ng-container matColumnDef="actions">
-        <mat-header-cell *matHeaderCellDef mat-sort-header
-          >Aksiyonlar</mat-header-cell
-        >
+        <mat-header-cell *matHeaderCellDef>Aksiyonlar</mat-header-cell>
         <mat-cell *matCellDef="let row">
-          <div class="action-buttons">
-            <button
-              mat-icon-button
-              color="warn"
-              (click)="deleteAnnouncement($event, row)"
-            >
-              <mat-icon>delete</mat-icon>
-            </button>
-          </div>
+          <button
+            mat-icon-button
+            color="primary"
+            (click)="onEditAnnouncement($event, row)"
+          >
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button
+            mat-icon-button
+            color="warn"
+            (click)="deleteAnnouncement($event, row)"
+          >
+            <mat-icon>delete</mat-icon>
+          </button>
         </mat-cell>
       </ng-container>
 
       <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
       <mat-row
         *matRowDef="let row; columns: displayedColumns"
-        class="example-element-row"
-        (click)="openDialog(row)"
+        class="clickable-row"
+        (click)="openDisplayDialog(row)"
       ></mat-row>
     </mat-table>
 
     <mat-paginator
-      [pageSizeOptions]="[5, 10, 25, 100]"
-      [pageSize]="10"
-      aria-label="Select page of users"
+      [pageSizeOptions]="[5, 10, 25]"
+      aria-label="Sayfa Seç"
     ></mat-paginator>
   </div>
 </div>

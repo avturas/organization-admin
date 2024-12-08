@@ -18,13 +18,7 @@ import {
   Query,
   DocumentData,
 } from '@angular/fire/firestore';
-import {
-  getStorage,
-  ref,
-  uploadBytesResumable,
-  getDownloadURL,
-  deleteObject,
-} from 'firebase/storage';
+import { getStorage, ref, deleteObject } from 'firebase/storage';
 import { MatDialog } from '@angular/material/dialog';
 import { addDoc, deleteDoc, doc, updateDoc } from '@firebase/firestore';
 import { EventDialogComponent } from './event-dialog.component';
