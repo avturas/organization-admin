@@ -1,0 +1,92 @@
+<div class="executive-committee-wrapper">
+  <div class="filter-section">
+    <mat-checkbox
+      *ngIf="authService.getUserRole() === 'headquarters'"
+      [(ngModel)]="onlyDisplayHeadquarters"
+      (change)="onCheckboxChange()"
+    >
+      Sadece Genel Merkez Üyelerini Göster
+    </mat-checkbox>
+
+    <mat-checkbox
+      *ngIf="authService.getUserRole() === 'city'"
+      [(ngModel)]="onlyDisplayCityUsers"
+      (change)="onCheckboxChange()"
+    >
+      Sadece İl Üyelerini Göster
+    </mat-checkbox>
+  </div>
+  <div class="table-header">
+    <mat-form-field>
+      <mat-label>Filter</mat-label>
+      <input
+        matInput
+        (keyup)="applyFilter($event)"
+        placeholder="Ex. Mia"
+        #input
+      />
+    </mat-form-field>
+    <button mat-raised-button (click)="onAddNewMember()">Kişi Ekle</button>
+  </div>
+
+  <div class="committee-table">
+    <mat-table #table [dataSource]="dataSource" matSort>
+      <!-- Name Column -->
+      <ng-container matColumnDef="name">
+        <mat-header-cell *matHeaderCellDef mat-sort-header
+          >İsim</mat-header-cell
+        >
+        <mat-cell *matCellDef="let row">{{ row.name }}</mat-cell>
+      </ng-container>
+
+      <!-- Title Column -->
+      <ng-container matColumnDef="role">
+        <mat-header-cell *matHeaderCellDef mat-sort-header
+          >Ünvan</mat-header-cell
+        >
+        <mat-cell *matCellDef="let row">{{ row.role }}</mat-cell>
+      </ng-container>
+
+      <!-- City Column -->
+      <ng-container matColumnDef="city">
+        <mat-header-cell *matHeaderCellDef mat-sort-header
+          >Şehir</mat-header-cell
+        >
+        <mat-cell *matCellDef="let row">{{ row.city || "-" }}</mat-cell>
+      </ng-container>
+
+      <!-- District Column -->
+      <ng-container matColumnDef="district">
+        <mat-header-cell *matHeaderCellDef mat-sort-header>
+          İlçe
+        </mat-header-cell>
+        <mat-cell *matCellDef="let row">{{ row.district || "-" }}</mat-cell>
+      </ng-container>
+
+      <!-- Actions Column -->
+      <ng-container matColumnDef="actions">
+        <mat-header-cell *matHeaderCellDef>Aksiyonlar</mat-header-cell>
+        <mat-cell *matCellDef="let row">
+          <button mat-icon-button color="primary" (click)="onEditMember(row)">
+            <mat-icon>edit</mat-icon>
+          </button>
+          <button mat-icon-button color="warn" (click)="onDeleteMember(row)">
+            <mat-icon>delete</mat-icon>
+          </button>
+        </mat-cell>
+      </ng-container>
+
+      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+      <mat-row
+        *matRowDef="let row; columns: displayedColumns"
+        class="row-hover"
+      ></mat-row>
+    </mat-table>
+
+    <mat-paginator
+      [pageSizeOptions]="[5, 10, 25]"
+      [pageSize]="10"
+      showFirstLastButtons
+    ></mat-paginator>
+  </div>
+</div>
