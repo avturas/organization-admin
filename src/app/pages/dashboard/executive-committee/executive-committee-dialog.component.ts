@@ -9,26 +9,29 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { CITIES } from '../../../shared/cities';
 import { DISTRICTS } from '../../../shared/districts';
 import { AuthService } from '../../../auth.service';
 
-export interface AnnouncementData {
+const TYPE_TEXTS = {
+  headquarters: 'Genel Merkez',
+  city: 'İl',
+  district: 'İlçe',
+};
+
+export interface ExecutiveCommitteeData {
   id?: string;
-  title: string;
-  description: string;
-  date: string;
-  audienceType: string;
+  name: string;
+  role: string;
+  type: string;
   city?: string;
   district?: string;
 }
 
 @Component({
-  selector: 'app-announcement-dialog',
+  selector: 'app-executive-committee-dialog',
   standalone: true,
   imports: [
     CommonModule,
@@ -39,16 +42,14 @@ export interface AnnouncementData {
     MatSelectModule,
     MatButtonModule,
     MatDialogModule,
-    MatDatepickerModule,
-    MatNativeDateModule,
   ],
-  templateUrl: './announcement-dialog.html',
-  styleUrls: ['./announcement-dialog.scss'],
+  templateUrl: './executive-committee-dialog.component.html',
+  styleUrls: ['./executive-committee-dialog.component.scss'],
 })
-export class AnnouncementDialogComponent implements OnInit {
-  announcementForm!: FormGroup;
-  readonlyMode: boolean;
-  availableAudienceTypes: { value: string; label: string }[] = [];
+export class ExecutiveCommitteeDialogComponent implements OnInit {
+  committeeForm!: FormGroup;
+  TYPE_TEXTS = TYPE_TEXTS;
+  availableTypes: string[] = [];
   availableCities = Object.entries(CITIES).map(([key, value]) => ({
     key,
     value,
@@ -59,13 +60,11 @@ export class AnnouncementDialogComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    public dialogRef: MatDialogRef<AnnouncementDialogComponent>,
+    public dialogRef: MatDialogRef<ExecutiveCommitteeDialogComponent>,
     private authService: AuthService,
     @Inject(MAT_DIALOG_DATA)
-    public data: { announcement: AnnouncementData; readonly: boolean }
-  ) {
-    this.readonlyMode = data.readonly || false;
-  }
+    public data: { member: ExecutiveCommitteeData; readonly: boolean }
+  ) {}
 
   ngOnInit(): void {
     const currentUserRole = this.authService.getUserRole();
@@ -73,70 +72,64 @@ export class AnnouncementDialogComponent implements OnInit {
     const currentUserDistrict = this.authService.getUserDistrict();
 
     if (currentUserRole === 'headquarters') {
-      this.availableAudienceTypes = [
-        { value: 'everyone', label: 'Herkes' },
-        { value: 'headquarters', label: 'Genel Merkez' },
-        { value: 'city', label: 'Şehir' },
-        { value: 'district', label: 'İlçe' },
-      ];
+      this.availableTypes = ['headquarters', 'city', 'district'];
     } else if (currentUserRole === 'city') {
-      this.availableAudienceTypes = [
-        { value: 'city', label: 'Şehir' },
-        { value: 'district', label: 'İlçe' },
-      ];
+      this.availableTypes = ['city', 'district'];
       this.availableCities = this.availableCities.filter(
         (city) => city.value === currentUserCity
       );
     } else if (currentUserRole === 'district') {
-      this.availableAudienceTypes = [{ value: 'district', label: 'İlçe' }];
+      this.availableTypes = ['district'];
       this.availableCities = this.availableCities.filter(
         (city) => city.value === currentUserCity
       );
       this.filteredDistricts = currentUserDistrict ? [currentUserDistrict] : [];
     }
 
-    this.announcementForm = this.fb.group({
-      id: [this.data?.announcement?.id || ''],
-      title: [this.data?.announcement?.title || '', Validators.required],
-      description: [
-        this.data?.announcement?.description || '',
-        Validators.required,
-      ],
-      date: [this.data?.announcement?.date || '', Validators.required],
-      audienceType: [
-        this.data?.announcement?.audienceType || '',
-        Validators.required,
-      ],
-      city: [this.data?.announcement?.city || currentUserCity || ''],
-      district: [
-        this.data?.announcement?.district || currentUserDistrict || '',
-      ],
+    this.committeeForm = this.fb.group({
+      id: [this.data?.member.id],
+      name: [this.data?.member?.name || '', Validators.required],
+      role: [this.data?.member?.role || '', Validators.required],
+      type: [this.data?.member?.type || '', Validators.required],
+      city: [this.data?.member?.city || currentUserCity || ''],
+      district: [this.data?.member?.district || currentUserDistrict || ''],
     });
 
-    this.onAudienceTypeChange(
-      this.announcementForm.controls['audienceType'].value
-    );
+    this.onTypeChange(this.committeeForm.controls['type'].value);
 
-    this.announcementForm.controls['audienceType'].valueChanges.subscribe(
-      (type) => {
-        this.onAudienceTypeChange(type);
-      }
-    );
-
-    if (this.readonlyMode) {
-      this.announcementForm.disable();
-    }
+    this.committeeForm.controls['type'].valueChanges.subscribe((type) => {
+      this.onTypeChange(type);
+    });
   }
 
-  onAudienceTypeChange(selectedType: string): void {
+  getRoleText = (role: string) => {
+    return TYPE_TEXTS[role as keyof typeof TYPE_TEXTS] || 'Bilinmeyen Rol';
+  };
+
+  onTypeChange(selectedType: string): void {
     this.showCityField = selectedType === 'city' || selectedType === 'district';
     this.showDistrictField = selectedType === 'district';
 
+    const currentUserRole = this.authService.getUserRole();
+    const currentUserCity = this.authService.getUserCity();
+    const currentUserDistrict = this.authService.getUserDistrict();
+
     if (!this.showCityField) {
-      this.announcementForm.controls['city'].reset();
+      this.committeeForm.controls['city'].reset();
     }
     if (!this.showDistrictField) {
-      this.announcementForm.controls['district'].reset();
+      this.committeeForm.controls['district'].reset();
+    }
+
+    if (currentUserRole === 'district' && selectedType === 'district') {
+      this.committeeForm.controls['city'].setValue(currentUserCity);
+      this.committeeForm.controls['district'].setValue(currentUserDistrict);
+      this.filteredDistricts = currentUserDistrict ? [currentUserDistrict] : [];
+    } else if (
+      this.showCityField &&
+      this.committeeForm.controls['city'].value
+    ) {
+      this.onCityChange(this.committeeForm.controls['city'].value);
     }
   }
 
@@ -146,7 +139,7 @@ export class AnnouncementDialogComponent implements OnInit {
 
     if (currentUserRole === 'district') {
       this.filteredDistricts = currentUserDistrict ? [currentUserDistrict] : [];
-      this.announcementForm.controls['district'].setValue(currentUserDistrict);
+      this.committeeForm.controls['district'].setValue(currentUserDistrict);
       return;
     }
 
@@ -155,16 +148,12 @@ export class AnnouncementDialogComponent implements OnInit {
     )?.value;
 
     this.filteredDistricts = cityName ? DISTRICTS[cityName] || [] : [];
-    this.announcementForm.controls['district'].reset();
+    this.committeeForm.controls['district'].reset();
   }
 
   onSubmit(): void {
-    if (this.announcementForm.valid) {
-      const formValue = { ...this.announcementForm.value };
-      if (formValue.date) {
-        formValue.date = new Date(formValue.date).toISOString();
-      }
-      this.dialogRef.close(formValue);
+    if (this.committeeForm.valid) {
+      this.dialogRef.close(this.committeeForm.value);
     }
   }
 }
