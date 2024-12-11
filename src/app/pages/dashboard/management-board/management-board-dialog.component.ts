@@ -21,7 +21,7 @@ const TYPE_TEXTS = {
   district: 'İlçe',
 };
 
-export interface ExecutiveCommitteeData {
+export interface ManagementBoardData {
   id?: string;
   name: string;
   role: string;
@@ -31,7 +31,7 @@ export interface ExecutiveCommitteeData {
 }
 
 @Component({
-  selector: 'app-executive-committee-dialog',
+  selector: 'app-management-board-dialog',
   standalone: true,
   imports: [
     CommonModule,
@@ -43,11 +43,11 @@ export interface ExecutiveCommitteeData {
     MatButtonModule,
     MatDialogModule,
   ],
-  templateUrl: './executive-committee-dialog.component.html',
-  styleUrls: ['./executive-committee-dialog.component.scss'],
+  templateUrl: './management-board-dialog.component.html',
+  styleUrls: ['./management-board-dialog.component.scss'],
 })
-export class ExecutiveCommitteeDialogComponent implements OnInit {
-  committeeForm!: FormGroup;
+export class ManagementBoardDialogComponent implements OnInit {
+  managementBoardForm!: FormGroup;
   TYPE_TEXTS = TYPE_TEXTS;
   availableTypes: string[] = [];
   availableCities = Object.entries(CITIES).map(([key, value]) => ({
@@ -60,10 +60,10 @@ export class ExecutiveCommitteeDialogComponent implements OnInit {
 
   constructor(
     private fb: FormBuilder,
-    public dialogRef: MatDialogRef<ExecutiveCommitteeDialogComponent>,
+    public dialogRef: MatDialogRef<ManagementBoardDialogComponent>,
     private authService: AuthService,
     @Inject(MAT_DIALOG_DATA)
-    public data: { member: ExecutiveCommitteeData; readonly: boolean }
+    public data: { member: ManagementBoardData; readonly: boolean }
   ) {}
 
   ngOnInit(): void {
@@ -86,18 +86,21 @@ export class ExecutiveCommitteeDialogComponent implements OnInit {
       this.filteredDistricts = currentUserDistrict ? [currentUserDistrict] : [];
     }
 
-    this.committeeForm = this.fb.group({
+    this.managementBoardForm = this.fb.group({
       id: [this.data?.member.id || ''],
       name: [this.data?.member?.name || '', Validators.required],
-      role: [this.data?.member?.role || '', Validators.required],
+      role: [
+        this.data?.member?.role || 'Yönetim Kurulu Üyesi',
+        Validators.required,
+      ],
       type: [this.data?.member?.type || '', Validators.required],
       city: [this.data?.member?.city || currentUserCity || ''],
       district: [this.data?.member?.district || currentUserDistrict || ''],
     });
 
-    this.onTypeChange(this.committeeForm.controls['type'].value);
+    this.onTypeChange(this.managementBoardForm.controls['type'].value);
 
-    this.committeeForm.controls['type'].valueChanges.subscribe((type) => {
+    this.managementBoardForm.controls['type'].valueChanges.subscribe((type) => {
       this.onTypeChange(type);
     });
   }
@@ -115,21 +118,23 @@ export class ExecutiveCommitteeDialogComponent implements OnInit {
     const currentUserDistrict = this.authService.getUserDistrict();
 
     if (!this.showCityField) {
-      this.committeeForm.controls['city'].reset();
+      this.managementBoardForm.controls['city'].reset();
     }
     if (!this.showDistrictField) {
-      this.committeeForm.controls['district'].reset();
+      this.managementBoardForm.controls['district'].reset();
     }
 
     if (currentUserRole === 'district' && selectedType === 'district') {
-      this.committeeForm.controls['city'].setValue(currentUserCity);
-      this.committeeForm.controls['district'].setValue(currentUserDistrict);
+      this.managementBoardForm.controls['city'].setValue(currentUserCity);
+      this.managementBoardForm.controls['district'].setValue(
+        currentUserDistrict
+      );
       this.filteredDistricts = currentUserDistrict ? [currentUserDistrict] : [];
     } else if (
       this.showCityField &&
-      this.committeeForm.controls['city'].value
+      this.managementBoardForm.controls['city'].value
     ) {
-      this.onCityChange(this.committeeForm.controls['city'].value);
+      this.onCityChange(this.managementBoardForm.controls['city'].value);
     }
   }
 
@@ -139,7 +144,9 @@ export class ExecutiveCommitteeDialogComponent implements OnInit {
 
     if (currentUserRole === 'district') {
       this.filteredDistricts = currentUserDistrict ? [currentUserDistrict] : [];
-      this.committeeForm.controls['district'].setValue(currentUserDistrict);
+      this.managementBoardForm.controls['district'].setValue(
+        currentUserDistrict
+      );
       return;
     }
 
@@ -148,12 +155,12 @@ export class ExecutiveCommitteeDialogComponent implements OnInit {
     )?.value;
 
     this.filteredDistricts = cityName ? DISTRICTS[cityName] || [] : [];
-    this.committeeForm.controls['district'].reset();
+    this.managementBoardForm.controls['district'].reset();
   }
 
   onSubmit(): void {
-    if (this.committeeForm.valid) {
-      this.dialogRef.close(this.committeeForm.value);
+    if (this.managementBoardForm.valid) {
+      this.dialogRef.close(this.managementBoardForm.value);
     }
   }
 }

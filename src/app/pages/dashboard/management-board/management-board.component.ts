@@ -23,10 +23,10 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { ExecutiveCommitteeDialogComponent } from './executive-committee-dialog.component';
+import { ManagementBoardDialogComponent } from './management-board-dialog.component';
 import { FormsModule } from '@angular/forms';
 
-export interface ExecutiveCommitteeData {
+export interface ManagementBoardData {
   id?: string;
   name: string;
   role: string;
@@ -36,7 +36,7 @@ export interface ExecutiveCommitteeData {
 }
 
 @Component({
-  selector: 'app-executive-committee',
+  selector: 'app-management-board',
   standalone: true,
   imports: [
     CommonModule,
@@ -50,12 +50,12 @@ export interface ExecutiveCommitteeData {
     MatCheckboxModule,
     FormsModule,
   ],
-  templateUrl: './executive-committee.component.html',
-  styleUrls: ['./executive-committee.component.scss'],
+  templateUrl: './management-board.component.html',
+  styleUrls: ['./management-board.component.scss'],
 })
-export class ExecutiveCommitteeComponent implements OnInit {
+export class ManagementBoardComponent implements OnInit {
   displayedColumns: string[] = ['name', 'role', 'city', 'district', 'actions'];
-  dataSource = new MatTableDataSource<ExecutiveCommitteeData>();
+  dataSource = new MatTableDataSource<ManagementBoardData>();
   onlyDisplayHeadquarters = false;
   onlyDisplayCityUsers = false;
 
@@ -68,7 +68,7 @@ export class ExecutiveCommitteeComponent implements OnInit {
     } else if (currentUserRole === 'city') {
       this.onlyDisplayCityUsers = true;
     }
-    this.getExecutiveCommittee();
+    this.getManagementBoard();
   }
 
   applyFilter(event: Event): void {
@@ -82,7 +82,7 @@ export class ExecutiveCommitteeComponent implements OnInit {
     }
   }
 
-  async getExecutiveCommittee(): Promise<void> {
+  async getManagementBoard(): Promise<void> {
     const firestore = getFirestore();
     const currentUserRole = this.authService.getUserRole();
     const currentUserCity = this.authService.getUserCity();
@@ -93,30 +93,30 @@ export class ExecutiveCommitteeComponent implements OnInit {
     if (currentUserRole === 'headquarters') {
       queryRef = collection(
         firestore,
-        'executiveCommittees'
+        'managementBoards'
       ) as Query<DocumentData>;
       if (this.onlyDisplayHeadquarters) {
         queryRef = query(
-          collection(firestore, 'executiveCommittees'),
+          collection(firestore, 'managementBoards'),
           where('city', '==', null),
           where('district', '==', null)
         );
       }
     } else if (currentUserRole === 'city') {
       queryRef = query(
-        collection(firestore, 'executiveCommittees'),
+        collection(firestore, 'managementBoards'),
         where('city', '==', currentUserCity)
       );
       if (this.onlyDisplayCityUsers) {
         queryRef = query(
-          collection(firestore, 'executiveCommittees'),
+          collection(firestore, 'managementBoards'),
           where('city', '==', currentUserCity),
           where('district', '==', null)
         );
       }
     } else if (currentUserRole === 'district') {
       queryRef = query(
-        collection(firestore, 'executiveCommittees'),
+        collection(firestore, 'managementBoards'),
         where('district', '==', currentUserDistrict)
       );
     } else {
@@ -124,19 +124,19 @@ export class ExecutiveCommitteeComponent implements OnInit {
     }
 
     const querySnapshot = await getDocs(queryRef);
-    const committeeMembers: ExecutiveCommitteeData[] = [];
+    const managementMembers: ManagementBoardData[] = [];
     querySnapshot.forEach((doc) => {
-      committeeMembers.push({
+      managementMembers.push({
         id: doc.id,
         ...doc.data(),
-      } as ExecutiveCommitteeData);
+      } as ManagementBoardData);
     });
 
-    this.dataSource = new MatTableDataSource(committeeMembers);
+    this.dataSource = new MatTableDataSource(managementMembers);
   }
 
   onAddNewMember(): void {
-    const dialogRef = this.dialog.open(ExecutiveCommitteeDialogComponent, {
+    const dialogRef = this.dialog.open(ManagementBoardDialogComponent, {
       width: '500px',
       data: {
         member: { name: '', role: '', hubType: '', city: '', district: '' },
@@ -146,14 +146,14 @@ export class ExecutiveCommitteeComponent implements OnInit {
 
     dialogRef.afterClosed().subscribe(async (result) => {
       if (result) {
-        const { id, ...updateData } = result;
-        await this.addMember(updateData);
+        delete result.id;
+        await this.addMember(result);
       }
     });
   }
 
-  async onEditMember(row: ExecutiveCommitteeData): Promise<void> {
-    const dialogRef = this.dialog.open(ExecutiveCommitteeDialogComponent, {
+  async onEditMember(row: ManagementBoardData): Promise<void> {
+    const dialogRef = this.dialog.open(ManagementBoardDialogComponent, {
       width: '500px',
       data: { member: row, readonly: false },
     });
@@ -165,42 +165,42 @@ export class ExecutiveCommitteeComponent implements OnInit {
     });
   }
 
-  async addMember(data: ExecutiveCommitteeData): Promise<void> {
+  async addMember(data: ManagementBoardData): Promise<void> {
     const firestore = getFirestore();
-    await addDoc(collection(firestore, 'executiveCommittees'), data);
-    this.getExecutiveCommittee();
+    await addDoc(collection(firestore, 'managementBoards'), data);
+    this.getManagementBoard();
   }
 
-  async updateCommitteeMember(data: ExecutiveCommitteeData): Promise<void> {
+  async updateCommitteeMember(data: ManagementBoardData): Promise<void> {
     if (!data.id) {
       console.error('Error: Missing ID for the committee member.');
       return;
     }
 
     const firestore = getFirestore();
-    const committeeMemberRef = doc(firestore, 'executiveCommittees', data.id);
+    const committeeMemberRef = doc(firestore, 'managementBoards', data.id);
 
     const { id, ...updateData } = data;
 
     try {
       await updateDoc(committeeMemberRef, updateData);
-      this.getExecutiveCommittee();
+      this.getManagementBoard();
       console.log('Committee member updated successfully');
     } catch (error) {
       console.error('Error updating committee member:', error);
     }
   }
 
-  async onDeleteMember(row: ExecutiveCommitteeData): Promise<void> {
+  async onDeleteMember(row: ManagementBoardData): Promise<void> {
     if (confirm('Bu kişiyi silmek istediğinize emin misiniz?')) {
       const firestore = getFirestore();
-      const memberRef = doc(firestore, 'executiveCommittees', row.id!);
+      const memberRef = doc(firestore, 'managementBoards', row.id!);
       await deleteDoc(memberRef);
-      this.getExecutiveCommittee();
+      this.getManagementBoard();
     }
   }
 
   onCheckboxChange(): void {
-    this.getExecutiveCommittee();
+    this.getManagementBoard();
   }
 }

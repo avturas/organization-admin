@@ -1,0 +1,55 @@
+<mat-dialog-content>
+  <form [formGroup]="managementBoardForm">
+    <mat-form-field appearance="fill">
+      <mat-label>Ad</mat-label>
+      <input matInput formControlName="name" placeholder="Üye Adı" />
+    </mat-form-field>
+
+    <mat-form-field appearance="fill">
+      <mat-label>Tip</mat-label>
+      <mat-select
+        formControlName="type"
+        (selectionChange)="onTypeChange($event.value)"
+      >
+        <mat-option *ngFor="let type of availableTypes" [value]="type">
+          {{ getRoleText(type) }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field *ngIf="showCityField" appearance="fill">
+      <mat-label>Şehir</mat-label>
+      <mat-select
+        formControlName="city"
+        (selectionChange)="onCityChange($event.value)"
+      >
+        <mat-option *ngFor="let city of availableCities" [value]="city.value">
+          {{ city.key }} - {{ city.value }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field *ngIf="showDistrictField" appearance="fill">
+      <mat-label>İlçe</mat-label>
+      <mat-select formControlName="district">
+        <mat-option
+          *ngFor="let district of filteredDistricts"
+          [value]="district"
+        >
+          {{ district }}
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions>
+  <button mat-button mat-dialog-close>İptal</button>
+  <button
+    mat-button
+    [disabled]="managementBoardForm.invalid"
+    (click)="onSubmit()"
+  >
+    Kaydet
+  </button>
+</mat-dialog-actions>
