@@ -9,6 +9,7 @@ import { AnnouncementsComponent } from './pages/dashboard/announcements/announce
 import { BlockedComponent } from './pages/blocked/blocked.component';
 import { roleGuard } from './guards/role.guard';
 import { ExecutiveCommitteeComponent } from './pages/dashboard/executive-committee/executive-committee.component';
+import { ManagementBoardComponent } from './pages/dashboard/management-board/management-board.component';
 
 export const routes: Routes = [
   {
@@ -41,6 +42,10 @@ export const routes: Routes = [
       {
         path: 'executive-committee',
         component: ExecutiveCommitteeComponent,
+      },
+      {
+        path: 'management-board',
+        component: ManagementBoardComponent,
       },
     ],
   },
