@@ -11,6 +11,7 @@ import { roleGuard } from './guards/role.guard';
 import { ExecutiveCommitteeComponent } from './pages/dashboard/executive-committee/executive-committee.component';
 import { ManagementBoardComponent } from './pages/dashboard/management-board/management-board.component';
 import { ReportsComponent } from './pages/dashboard/reports/reports.component';
+import { DocumentsComponent } from './pages/documents/documents.component';
 
 export const routes: Routes = [
   {
@@ -51,6 +52,10 @@ export const routes: Routes = [
       {
         path: 'reports',
         component: ReportsComponent,
+      },
+      {
+        path: 'documents',
+        component: DocumentsComponent,
       },
     ],
   },
