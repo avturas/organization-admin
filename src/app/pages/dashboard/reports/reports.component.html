@@ -1,0 +1,121 @@
+<div class="filter-section">
+  <mat-form-field>
+    <mat-label>Şehir</mat-label>
+    <mat-select
+      [(value)]="selectedCity"
+      (selectionChange)="onCityChange($event.value)"
+      [disabled]="isCityDisabled"
+    >
+      <mat-option *ngFor="let city of availableCities" [value]="city.value">
+        {{ city.key }} - {{ city.value }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field>
+    <mat-label>İlçe</mat-label>
+    <mat-select [(value)]="selectedDistrict" [disabled]="isDistrictDisabled">
+      <mat-option *ngFor="let district of filteredDistricts" [value]="district">
+        {{ district }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+  <mat-form-field>
+    <mat-label>Başlangıç Tarihi</mat-label>
+    <input
+      matInput
+      [matDatepicker]="pickerStart"
+      [(ngModel)]="filterStartDate"
+    />
+    <mat-datepicker-toggle
+      matSuffix
+      [for]="pickerStart"
+    ></mat-datepicker-toggle>
+    <mat-datepicker #pickerStart></mat-datepicker>
+  </mat-form-field>
+
+  <mat-form-field>
+    <mat-label>Bitiş Tarihi</mat-label>
+    <input matInput [matDatepicker]="pickerEnd" [(ngModel)]="filterEndDate" />
+    <mat-datepicker-toggle matSuffix [for]="pickerEnd"></mat-datepicker-toggle>
+    <mat-datepicker #pickerEnd></mat-datepicker>
+  </mat-form-field>
+
+  <button mat-raised-button color="primary" (click)="applyFilters()">
+    Filtere
+  </button>
+  <button mat-raised-button color="accent" (click)="exportToPDF()">
+    Rapor Oluştur
+  </button>
+  <button mat-raised-button color="warning" (click)="clearFilters()">
+    Filtre Kaldır
+  </button>
+</div>
+
+<div class="reports-wrapper">
+  <mat-card>
+    <mat-card-title>Toplam Etkinlik</mat-card-title>
+    <mat-card-content class="total-events-content">
+      <p class="total-events-number">{{ totalEventCount }}</p>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card>
+    <mat-card-title>Etkinlik Sayısı</mat-card-title>
+    <div>
+      <canvas
+        baseChart
+        [datasets]="eventsPerMonthData"
+        [labels]="eventsPerMonthLabels"
+        [options]="generalChartOptions"
+        [legend]="true"
+        [type]="eventsPerMonthChartType"
+      ></canvas>
+    </div>
+  </mat-card>
+
+  <mat-card>
+    <mat-card-title>Etkinlik Çeşitleri</mat-card-title>
+    <div>
+      <canvas
+        baseChart
+        [datasets]="eventsByTypeData"
+        [labels]="eventsByTypeLabels"
+        [options]="generalChartOptions"
+        [legend]="true"
+        [type]="eventsByTypeChartType"
+      ></canvas>
+    </div>
+  </mat-card>
+
+  <mat-card *ngIf="currentUserRole === 'headquarters'">
+    <mat-card-title>En Çok Etkinlik Yapan 10 Şehir</mat-card-title>
+    <div>
+      <canvas
+        baseChart
+        [datasets]="topCitiesData"
+        [labels]="topCitiesLabels"
+        [options]="generalChartOptions"
+        [legend]="true"
+        [type]="topCitiesChartType"
+      ></canvas>
+    </div>
+  </mat-card>
+
+  <mat-card
+    *ngIf="currentUserRole === 'headquarters' || currentUserRole === 'city'"
+  >
+    <mat-card-title>En Çok Etkinlik Yapan 10 İlçe</mat-card-title>
+    <div>
+      <canvas
+        baseChart
+        [datasets]="topDistrictsData"
+        [labels]="topDistrictsLabels"
+        [options]="generalChartOptions"
+        [legend]="true"
+        [type]="topDistrictsChartType"
+      ></canvas>
+    </div>
+  </mat-card>
+</div>
