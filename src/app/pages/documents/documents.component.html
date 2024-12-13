@@ -1,0 +1,85 @@
+<div class="documents-wrapper">
+  <div *ngIf="isHeadquartersUser" class="upload-section">
+    <div class="file-upload">
+      <input
+        #fileInput
+        id="fileInput"
+        type="file"
+        style="display: none"
+        (change)="onFileSelected($event)"
+      />
+
+      <button mat-raised-button color="primary" (click)="triggerFileInput()">
+        Belge Seç
+      </button>
+
+      <span *ngIf="selectedFile">{{ selectedFile.name }}</span>
+    </div>
+    <button
+      mat-raised-button
+      color="accent"
+      [disabled]="!selectedFile"
+      (click)="uploadFile()"
+    >
+      Yükle
+    </button>
+  </div>
+
+  <mat-form-field>
+    <mat-label>Filtrele</mat-label>
+    <input
+      matInput
+      (keyup)="applyFilter($event)"
+      placeholder="Filter by name"
+    />
+  </mat-form-field>
+
+  <mat-table [dataSource]="dataSource" matSort>
+    <ng-container matColumnDef="fileName">
+      <mat-header-cell *matHeaderCellDef mat-sort-header
+        >Belge Adı</mat-header-cell
+      >
+      <mat-cell *matCellDef="let file">{{ file.fileName }}</mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="uploadedBy">
+      <mat-header-cell *matHeaderCellDef mat-sort-header
+        >Yükleyen</mat-header-cell
+      >
+      <mat-cell *matCellDef="let file">{{ file.uploadedBy }}</mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="uploadDate">
+      <mat-header-cell *matHeaderCellDef mat-sort-header
+        >Yükleme Tarihi</mat-header-cell
+      >
+      <mat-cell *matCellDef="let file">{{
+        file.uploadDate | date : "short"
+      }}</mat-cell>
+    </ng-container>
+
+    <ng-container matColumnDef="actions">
+      <mat-header-cell *matHeaderCellDef>Aksiyonlar</mat-header-cell>
+      <mat-cell *matCellDef="let file">
+        <button
+          mat-icon-button
+          color="primary"
+          (click)="downloadFile(file.filePath)"
+        >
+          <mat-icon>download</mat-icon>
+        </button>
+        <button
+          mat-icon-button
+          *ngIf="isHeadquartersUser"
+          color="warn"
+          (click)="deleteFile(file.id, file.filePath)"
+        >
+          <mat-icon>delete</mat-icon>
+        </button>
+      </mat-cell>
+    </ng-container>
+
+    <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+    <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
+  </mat-table>
+</div>
