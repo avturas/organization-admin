@@ -1,0 +1,47 @@
+.filter-section {
+    display: flex;
+    flex-direction: row;
+    gap: 24px;
+    padding: 24px;
+
+    button {
+        height: 56px;
+    }
+}
+
+.reports-wrapper {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 16px;
+    justify-content: space-between;
+    width: 100%;
+    padding: 20px;
+    background-color: white;
+    margin: 0;
+    box-sizing: border-box;
+  
+    mat-card {
+      padding: 16px;
+      flex-grow: 1;
+      margin: 0 10px;
+      max-width: 50%;
+      min-width: 30%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+  }
+
+  .total-events-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+  }
+  
+  .total-events-number {
+    font-size: 36px;
+    font-weight: bold;
+    text-align: center;
+  }

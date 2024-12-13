@@ -14,6 +14,12 @@ import { AuthService } from '../../auth.service';
 import { BreakpointObserver, Breakpoints } from '@angular/cdk/layout';
 import { CommonModule } from '@angular/common';
 
+const TYPE_TEXTS = {
+  headquarters: 'Genel Merkez',
+  city: 'İl',
+  district: 'İlçe',
+};
+
 @Component({
   selector: 'app-dashboard',
   standalone: true,
@@ -36,6 +42,7 @@ import { CommonModule } from '@angular/common';
 })
 export class DashboardComponent implements OnInit, OnDestroy {
   public phoneNumber = '';
+  TYPE_TEXTS = TYPE_TEXTS;
   public drawerType: 'side' | 'over' | 'push' = 'side';
   public role: string | null = null;
   public city: string | null = null;
@@ -58,6 +65,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
       this.drawerType = result.matches ? 'over' : 'side';
     });
   }
+
+  getRoleText = (role: string) => {
+    return TYPE_TEXTS[role as keyof typeof TYPE_TEXTS] || 'Bilinmeyen Rol';
+  };
 
   async initializeUser() {
     try {

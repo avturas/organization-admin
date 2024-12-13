@@ -12,12 +12,14 @@
     <mat-icon>account_circle</mat-icon>
   </button>
   <mat-menu #userAccountMenu [overlapTrigger]="false" yPosition="below">
-    <p>Your Role: {{ role }}</p>
-    <p *ngIf="city">City: {{ city }}</p>
-    <p *ngIf="district">District: {{ district }}</p>
+    <div class="account-info">
+      <p *ngIf="role">Hesap Türü: {{ getRoleText(role) }}</p>
+      <p *ngIf="city">Şehir: {{ city }}</p>
+      <p *ngIf="district">İlçe: {{ district }}</p>
+    </div>
     <button mat-menu-item disabled>{{ phoneNumber }}</button>
     <button mat-menu-item (click)="logOut()">
-      <mat-icon>exit_to_app</mat-icon>Logout
+      <mat-icon>exit_to_app</mat-icon>Çıkış Yap
     </button>
   </mat-menu>
 </mat-toolbar>
@@ -54,17 +56,13 @@
         <mat-icon matListItemIcon>groups</mat-icon>
         <div matListItemTitle>Yönetim Kurulu</div>
       </mat-list-item>
-      <mat-list-item routerLink="./announcements">
+      <mat-list-item routerLink="./reports">
         <mat-icon matListItemIcon>monitoring</mat-icon>
         <div matListItemTitle>Raporlar</div>
       </mat-list-item>
       <mat-list-item routerLink="./announcements">
         <mat-icon matListItemIcon>description</mat-icon>
         <div matListItemTitle>Dökümanlar</div>
-      </mat-list-item>
-      <mat-list-item routerLink="./announcements">
-        <mat-icon matListItemIcon>photo_library</mat-icon>
-        <div matListItemTitle>Görseller</div>
       </mat-list-item>
     </mat-nav-list>
   </mat-sidenav>

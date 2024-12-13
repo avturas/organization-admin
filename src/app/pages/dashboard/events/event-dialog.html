@@ -180,7 +180,7 @@
     mat-button
     (click)="onSubmit()"
     cdkFocusInitial
-    [disabled]="eventForm.invalid || (!selectedFile && !imagePreview)"
+    [disabled]="eventForm.invalid || (!selectedFile && !data.event.imageUrl)"
   >
     Kaydet
   </button>

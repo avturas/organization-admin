@@ -220,35 +220,41 @@ export class EventDialogComponent implements OnInit {
   }
 
   async onSubmit(): Promise<void> {
-    if (this.eventForm.valid && this.selectedFile) {
-      const storage = getStorage();
-      const filePath = `events/${Date.now()}_${this.selectedFile.name}`;
-      const fileRef = ref(storage, filePath);
-      const formValue = { ...this.eventForm.value };
+    if (this.eventForm.valid) {
+      if (this.selectedFile) {
+        const storage = getStorage();
+        const filePath = `events/${Date.now()}_${this.selectedFile.name}`;
+        const fileRef = ref(storage, filePath);
+        const formValue = { ...this.eventForm.value };
 
-      if (formValue.date) {
-        formValue.date = new Date(formValue.date).toISOString();
-      }
-
-      const uploadTask = uploadBytesResumable(fileRef, this.selectedFile);
-
-      uploadTask.on(
-        'state_changed',
-        (snapshot) => {
-          this.uploadProgress =
-            (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-        },
-        (error) => {
-          console.error('File upload error:', error);
-        },
-        async () => {
-          const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-          formValue.imageUrl = downloadURL;
-          this.dialogRef.close(formValue);
+        if (formValue.date) {
+          formValue.date = new Date(formValue.date).toISOString();
         }
-      );
-    } else {
-      this.dialogRef.close(this.eventForm.value);
+
+        const uploadTask = uploadBytesResumable(fileRef, this.selectedFile);
+
+        uploadTask.on(
+          'state_changed',
+          (snapshot) => {
+            this.uploadProgress =
+              (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+          },
+          (error) => {
+            console.error('File upload error:', error);
+          },
+          async () => {
+            const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+            formValue.imageUrl = downloadURL;
+            this.dialogRef.close(formValue);
+          }
+        );
+      } else {
+        const formValue = { ...this.eventForm.value };
+        if (formValue.date) {
+          formValue.date = new Date(formValue.date).toISOString();
+        }
+        this.dialogRef.close(formValue);
+      }
     }
   }
 }
