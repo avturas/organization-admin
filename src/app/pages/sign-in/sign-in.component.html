@@ -29,7 +29,7 @@
           Şifre Gönder
         </button>
       </div>
-      <mat-form-field>
+      <mat-form-field *ngIf="otpSent">
         <mat-label>SMS Şifresi</mat-label>
         <input
           type="password"
@@ -44,7 +44,7 @@
         {{ error }}
       </p>
 
-      <div class="button">
+      <div class="button" *ngIf="otpSent">
         <button
           (click)="verifyOtp()"
           type="submit"

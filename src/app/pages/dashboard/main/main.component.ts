@@ -13,6 +13,7 @@ import {
 } from '@angular/fire/firestore';
 import { MatCardModule } from '@angular/material/card';
 import { CommonModule } from '@angular/common';
+import { MatIconModule } from '@angular/material/icon';
 
 const USER_ROLE_TEXT = {
   headquarters: 'GENEL MERKEZ',
@@ -38,7 +39,7 @@ interface AnnouncementData {
 @Component({
   selector: 'app-main',
   standalone: true,
-  imports: [MatCardModule, CommonModule],
+  imports: [MatCardModule, CommonModule, MatIconModule],
   templateUrl: './main.component.html',
   styleUrls: ['./main.component.scss'],
 })

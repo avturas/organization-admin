@@ -26,15 +26,14 @@ mat-form-field {
   flex-direction: column;
 
   button {
+    margin-top: 8px;
     margin-bottom: 8px;
   }
 }
 
 mat-card-title {
-  img {
-    width: 48px;
-    margin: 12px;
-  }
+  margin-bottom: 12px;
+  margin-top: 12px;
 }
 
 .error {
