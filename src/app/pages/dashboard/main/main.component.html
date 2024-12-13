@@ -1,39 +1,72 @@
 <div class="dashboard-content">
-  <!-- First row with three cards -->
   <div class="row">
-    <mat-card class="example-card">
+    <mat-card class="info-card">
       <mat-card-header>
-        <mat-card-title></mat-card-title>
-      </mat-card-header>
-      <mat-card-content> </mat-card-content>
-    </mat-card>
-
-    <mat-card class="example-card">
-      <mat-card-header>
-        <mat-card-title>Geçmiş En Son 5 Etkinlik</mat-card-title>
+        <mat-card-title>Kullanıcı Bilgileri</mat-card-title>
       </mat-card-header>
       <mat-card-content>
-        <ul>
-          <li *ngFor="let event of lastFiveEvents">{{ event }}</li>
-        </ul>
+        <p><strong>Ad:</strong> {{ userInfo.name }}</p>
+        <p><strong>Email:</strong> {{ userInfo.email }}</p>
+        <p><strong>Rol:</strong> {{ userInfo.role }}</p>
+        <p><strong>Şehir:</strong> {{ userInfo.city }}</p>
+        <p><strong>İlçe:</strong> {{ userInfo.district }}</p>
       </mat-card-content>
     </mat-card>
 
-    <mat-card class="example-card">
+    <mat-card class="events-card">
       <mat-card-header>
-        <mat-card-title>Önümüzdeki 5 Etkinlik</mat-card-title>
+        <mat-card-title>Son 5 Etkinlik</mat-card-title>
       </mat-card-header>
       <mat-card-content>
         <ul>
-          <li *ngFor="let event of upcomingFiveEvents">{{ event }}</li>
+          <li *ngFor="let event of lastFiveEvents">
+            {{ event.name }} - {{ event.date | date : "shortDate" }} <br />
+            {{ event.city }} - {{ event.district }}
+          </li>
+        </ul>
+      </mat-card-content>
+    </mat-card>
+    <mat-card class="events-card">
+      <mat-card-header>
+        <mat-card-title>Yaklaşan 5 Etkinlik</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <ul>
+          <li *ngFor="let event of upcomingFiveEvents">
+            {{ event.name }} - {{ event.date | date : "shortDate" }} <br />
+            {{ event.city }} - {{ event.district }}
+          </li>
         </ul>
       </mat-card-content>
     </mat-card>
   </div>
 
   <div class="row">
-    <mat-card class="example-card"> </mat-card>
+    <mat-card class="announcements-card">
+      <mat-card-header>
+        <mat-card-title>Son 10 Duyuru</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <ul>
+          <li *ngFor="let announcement of latestAnnouncements">
+            {{ announcement.title }} - {{ announcement.description }} <br />
+            {{ announcement.date | date : "shortDate" }}
+          </li>
+        </ul>
+      </mat-card-content>
+    </mat-card>
 
-    <mat-card class="example-card"> </mat-card>
+    <mat-card class="links-card">
+      <mat-card-header>
+        <mat-card-title>Bağlantılar</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <ul>
+          <li><a href="/events">Etkinlikler</a></li>
+          <li><a href="/announcements">Duyurular</a></li>
+          <li><a href="https://www.socialmedia.com">Sosyal Medya</a></li>
+        </ul>
+      </mat-card-content>
+    </mat-card>
   </div>
 </div>

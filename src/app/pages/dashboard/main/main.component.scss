@@ -3,6 +3,7 @@
   flex-direction: column;
   align-items: center;
   padding: 20px;
+  height: calc(100% - 64px);
 }
 
 .row {
@@ -10,6 +11,8 @@
   justify-content: space-between;
   width: 100%;
   margin: 12px;
+  gap: 24px;
+  flex-grow: 1;
 }
 
 .example-card {
@@ -19,13 +22,15 @@
   min-width: 30%;
 }
 
-.mat-card {
+mat-card {
   display: flex;
   flex-direction: column;
+  flex-grow: 1;
 }
 
-.mat-card-content {
+mat-card-content {
   flex-grow: 1;
+  padding: 12px;
 }
 
 @media (max-width: 600px) {

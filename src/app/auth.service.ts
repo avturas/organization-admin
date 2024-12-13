@@ -33,6 +33,13 @@ export class AuthService {
   public role: string | null = null;
   public city: string | null = null;
   public district: string | null = null;
+  public userInfo: {
+    name: string;
+    email: string;
+  } = {
+    name: '',
+    email: '',
+  };
 
   constructor(private router: Router) {
     this.auth.onAuthStateChanged(async (user) => {
@@ -72,9 +79,17 @@ export class AuthService {
       this.role = userData['role'];
       this.city = userData['city'];
       this.district = userData['district'];
+      this.userInfo = {
+        name: userData['name'] + ' ' + userData['surname'],
+        email: userData['email'],
+      };
     } else {
       console.error('User not found in Firestore.');
     }
+  }
+
+  getUserInfo() {
+    return this.userInfo;
   }
 
   getUserRole(): string | null {
