@@ -37,11 +37,10 @@ interface AnnouncementData {
 }
 
 @Component({
-  selector: 'app-main',
-  standalone: true,
-  imports: [MatCardModule, CommonModule, MatIconModule],
-  templateUrl: './main.component.html',
-  styleUrls: ['./main.component.scss'],
+    selector: 'app-main',
+    imports: [MatCardModule, CommonModule, MatIconModule],
+    templateUrl: './main.component.html',
+    styleUrls: ['./main.component.scss']
 })
 export class MainComponent implements OnInit {
   userInfo = {

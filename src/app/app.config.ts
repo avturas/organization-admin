@@ -24,7 +24,6 @@ import {
   getRemoteConfig,
   provideRemoteConfig,
 } from '@angular/fire/remote-config';
-import { getVertexAI, provideVertexAI } from '@angular/fire/vertexai-preview';
 import { environment } from './../environments/environment';
 import { MAT_DATE_LOCALE, MatNativeDateModule } from '@angular/material/core';
 import { provideCharts, withDefaultRegisterables } from 'ng2-charts';
@@ -59,7 +58,6 @@ export const appConfig: ApplicationConfig = {
     providePerformance(() => getPerformance()),
     provideStorage(() => getStorage()),
     provideRemoteConfig(() => getRemoteConfig()),
-    provideVertexAI(() => getVertexAI()),
     provideCharts(withDefaultRegisterables()),
   ],
 };

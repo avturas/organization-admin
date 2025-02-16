@@ -34,20 +34,19 @@ export interface EventData {
 }
 
 @Component({
-  selector: 'app-events',
-  standalone: true,
-  imports: [
-    CommonModule,
-    MatTableModule,
-    MatSortModule,
-    MatPaginatorModule,
-    MatButtonModule,
-    MatIconModule,
-    MatInputModule,
-    MatFormFieldModule,
-  ],
-  templateUrl: './events.component.html',
-  styleUrls: ['./events.component.scss'],
+    selector: 'app-events',
+    imports: [
+        CommonModule,
+        MatTableModule,
+        MatSortModule,
+        MatPaginatorModule,
+        MatButtonModule,
+        MatIconModule,
+        MatInputModule,
+        MatFormFieldModule,
+    ],
+    templateUrl: './events.component.html',
+    styleUrls: ['./events.component.scss']
 })
 export class EventsComponent implements OnInit {
   dataSource = new MatTableDataSource<EventData>();

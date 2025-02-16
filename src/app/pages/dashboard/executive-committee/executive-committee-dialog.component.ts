@@ -31,20 +31,19 @@ export interface ExecutiveCommitteeData {
 }
 
 @Component({
-  selector: 'app-executive-committee-dialog',
-  standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    FormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatButtonModule,
-    MatDialogModule,
-  ],
-  templateUrl: './executive-committee-dialog.component.html',
-  styleUrls: ['./executive-committee-dialog.component.scss'],
+    selector: 'app-executive-committee-dialog',
+    imports: [
+        CommonModule,
+        ReactiveFormsModule,
+        FormsModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatSelectModule,
+        MatButtonModule,
+        MatDialogModule,
+    ],
+    templateUrl: './executive-committee-dialog.component.html',
+    styleUrls: ['./executive-committee-dialog.component.scss']
 })
 export class ExecutiveCommitteeDialogComponent implements OnInit {
   committeeForm!: FormGroup;

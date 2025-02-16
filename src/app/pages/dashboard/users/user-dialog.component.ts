@@ -23,20 +23,19 @@ const ROLE_TEXTS = {
 };
 
 @Component({
-  selector: 'app-user-dialog',
-  standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    FormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatButtonModule,
-    MatDialogModule,
-  ],
-  templateUrl: './user-dialog.html',
-  styleUrl: './user-dialog.scss',
+    selector: 'app-user-dialog',
+    imports: [
+        CommonModule,
+        ReactiveFormsModule,
+        FormsModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatSelectModule,
+        MatButtonModule,
+        MatDialogModule,
+    ],
+    templateUrl: './user-dialog.html',
+    styleUrl: './user-dialog.scss'
 })
 export class UserDialog implements OnInit {
   userForm!: FormGroup;

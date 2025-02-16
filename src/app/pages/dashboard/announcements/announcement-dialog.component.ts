@@ -28,22 +28,21 @@ export interface AnnouncementData {
 }
 
 @Component({
-  selector: 'app-announcement-dialog',
-  standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    FormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatButtonModule,
-    MatDialogModule,
-    MatDatepickerModule,
-    MatNativeDateModule,
-  ],
-  templateUrl: './announcement-dialog.html',
-  styleUrls: ['./announcement-dialog.scss'],
+    selector: 'app-announcement-dialog',
+    imports: [
+        CommonModule,
+        ReactiveFormsModule,
+        FormsModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatSelectModule,
+        MatButtonModule,
+        MatDialogModule,
+        MatDatepickerModule,
+        MatNativeDateModule,
+    ],
+    templateUrl: './announcement-dialog.html',
+    styleUrls: ['./announcement-dialog.scss']
 })
 export class AnnouncementDialogComponent implements OnInit {
   announcementForm!: FormGroup;
