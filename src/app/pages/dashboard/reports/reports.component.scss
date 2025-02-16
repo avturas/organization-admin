@@ -25,7 +25,6 @@
       padding: 16px;
       flex-grow: 1;
       margin: 0 10px;
-      max-width: 50%;
       min-width: 30%;
       display: flex;
       flex-direction: column;
@@ -44,4 +43,37 @@
     font-size: 36px;
     font-weight: bold;
     text-align: center;
+  }
+
+  @media (max-width: 600px) {
+    .row {
+      flex-direction: column;
+      align-items: center;
+    }
+  
+    mat-card {
+      width: 100%;
+      margin: 10px 0;
+      max-width: 100%;
+      mat-card-content {
+        min-height: 120px;
+      }
+    }
+
+    .filter-section {
+      display: flex;
+      flex-wrap: wrap;
+
+      mat-form-field {
+        width: 100%;
+        min-width: 100%;
+      }
+    }
+
+  }
+
+  @media (min-width: 600px) {
+    mat-card {
+      max-width: 50%;
+    }
   }
