@@ -36,22 +36,21 @@ export interface ManagementBoardData {
 }
 
 @Component({
-  selector: 'app-management-board',
-  standalone: true,
-  imports: [
-    CommonModule,
-    MatTableModule,
-    MatSortModule,
-    MatPaginatorModule,
-    MatButtonModule,
-    MatIconModule,
-    MatInputModule,
-    MatFormFieldModule,
-    MatCheckboxModule,
-    FormsModule,
-  ],
-  templateUrl: './management-board.component.html',
-  styleUrls: ['./management-board.component.scss'],
+    selector: 'app-management-board',
+    imports: [
+        CommonModule,
+        MatTableModule,
+        MatSortModule,
+        MatPaginatorModule,
+        MatButtonModule,
+        MatIconModule,
+        MatInputModule,
+        MatFormFieldModule,
+        MatCheckboxModule,
+        FormsModule,
+    ],
+    templateUrl: './management-board.component.html',
+    styleUrls: ['./management-board.component.scss']
 })
 export class ManagementBoardComponent implements OnInit {
   displayedColumns: string[] = ['name', 'role', 'city', 'district', 'actions'];

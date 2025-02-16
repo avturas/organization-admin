@@ -36,22 +36,21 @@ export interface ExecutiveCommitteeData {
 }
 
 @Component({
-  selector: 'app-executive-committee',
-  standalone: true,
-  imports: [
-    CommonModule,
-    MatTableModule,
-    MatSortModule,
-    MatPaginatorModule,
-    MatButtonModule,
-    MatIconModule,
-    MatInputModule,
-    MatFormFieldModule,
-    MatCheckboxModule,
-    FormsModule,
-  ],
-  templateUrl: './executive-committee.component.html',
-  styleUrls: ['./executive-committee.component.scss'],
+    selector: 'app-executive-committee',
+    imports: [
+        CommonModule,
+        MatTableModule,
+        MatSortModule,
+        MatPaginatorModule,
+        MatButtonModule,
+        MatIconModule,
+        MatInputModule,
+        MatFormFieldModule,
+        MatCheckboxModule,
+        FormsModule,
+    ],
+    templateUrl: './executive-committee.component.html',
+    styleUrls: ['./executive-committee.component.scss']
 })
 export class ExecutiveCommitteeComponent implements OnInit {
   displayedColumns: string[] = ['name', 'role', 'city', 'district', 'actions'];

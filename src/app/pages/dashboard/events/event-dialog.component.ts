@@ -58,23 +58,22 @@ const EVENT_TYPE_OWNER_TEXT = {
 };
 
 @Component({
-  selector: 'app-event-dialog',
-  standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    FormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatButtonModule,
-    MatDialogModule,
-    MatDatepickerModule,
-    MatNativeDateModule,
-    MatIconModule,
-  ],
-  templateUrl: './event-dialog.html',
-  styleUrls: ['./event-dialog.scss'],
+    selector: 'app-event-dialog',
+    imports: [
+        CommonModule,
+        ReactiveFormsModule,
+        FormsModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatSelectModule,
+        MatButtonModule,
+        MatDialogModule,
+        MatDatepickerModule,
+        MatNativeDateModule,
+        MatIconModule,
+    ],
+    templateUrl: './event-dialog.html',
+    styleUrls: ['./event-dialog.scss']
 })
 export class EventDialogComponent implements OnInit {
   eventForm!: FormGroup;

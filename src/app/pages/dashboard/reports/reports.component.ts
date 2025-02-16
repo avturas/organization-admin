@@ -44,22 +44,21 @@ function convertTurkishToEnglish(text: string): string {
 }
 
 @Component({
-  selector: 'app-reports',
-  standalone: true,
-  imports: [
-    CommonModule,
-    MatFormFieldModule,
-    MatSelectModule,
-    MatButtonModule,
-    MatCardModule,
-    MatDatepickerModule,
-    MatNativeDateModule,
-    MatInputModule,
-    BaseChartDirective,
-    FormsModule,
-  ],
-  templateUrl: './reports.component.html',
-  styleUrls: ['./reports.component.scss'],
+    selector: 'app-reports',
+    imports: [
+        CommonModule,
+        MatFormFieldModule,
+        MatSelectModule,
+        MatButtonModule,
+        MatCardModule,
+        MatDatepickerModule,
+        MatNativeDateModule,
+        MatInputModule,
+        BaseChartDirective,
+        FormsModule,
+    ],
+    templateUrl: './reports.component.html',
+    styleUrls: ['./reports.component.scss']
 })
 export class ReportsComponent implements OnInit {
   availableCities = Object.entries(CITIES).map(([key, value]) => ({

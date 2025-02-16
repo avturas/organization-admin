@@ -33,20 +33,19 @@ interface DocumentData {
 }
 
 @Component({
-  selector: 'app-documents',
-  standalone: true,
-  imports: [
-    CommonModule,
-    MatTableModule,
-    MatSortModule,
-    MatPaginatorModule,
-    MatButtonModule,
-    MatIconModule,
-    MatInputModule,
-    MatFormFieldModule,
-  ],
-  templateUrl: './documents.component.html',
-  styleUrls: ['./documents.component.scss'],
+    selector: 'app-documents',
+    imports: [
+        CommonModule,
+        MatTableModule,
+        MatSortModule,
+        MatPaginatorModule,
+        MatButtonModule,
+        MatIconModule,
+        MatInputModule,
+        MatFormFieldModule,
+    ],
+    templateUrl: './documents.component.html',
+    styleUrls: ['./documents.component.scss']
 })
 export class DocumentsComponent implements OnInit {
   @ViewChild('fileInput', { static: false })

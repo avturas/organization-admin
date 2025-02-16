@@ -11,20 +11,19 @@ import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
 @Component({
-  selector: 'app-sign-in',
-  standalone: true,
-  imports: [
-    MatButtonModule,
-    MatIconModule,
-    MatCardModule,
-    MatInputModule,
-    MatToolbarModule,
-    MatFormFieldModule,
-    FormsModule,
-    CommonModule,
-  ],
-  templateUrl: './sign-in.component.html',
-  styleUrl: './sign-in.component.scss',
+    selector: 'app-sign-in',
+    imports: [
+        MatButtonModule,
+        MatIconModule,
+        MatCardModule,
+        MatInputModule,
+        MatToolbarModule,
+        MatFormFieldModule,
+        FormsModule,
+        CommonModule,
+    ],
+    templateUrl: './sign-in.component.html',
+    styleUrl: './sign-in.component.scss'
 })
 export class SignInComponent {
   phoneNumber: string = '';
