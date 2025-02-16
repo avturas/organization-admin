@@ -36,19 +36,18 @@ export interface UserData {
 }
 
 @Component({
-  selector: 'app-users',
-  standalone: true,
-  imports: [
-    MatFormFieldModule,
-    MatInputModule,
-    MatTableModule,
-    MatSortModule,
-    MatPaginatorModule,
-    MatButtonModule,
-    FormsModule,
-  ],
-  templateUrl: './users.component.html',
-  styleUrls: ['./users.component.scss'],
+    selector: 'app-users',
+    imports: [
+        MatFormFieldModule,
+        MatInputModule,
+        MatTableModule,
+        MatSortModule,
+        MatPaginatorModule,
+        MatButtonModule,
+        FormsModule,
+    ],
+    templateUrl: './users.component.html',
+    styleUrls: ['./users.component.scss']
 })
 export class UsersComponent {
   displayedColumns: string[] = [

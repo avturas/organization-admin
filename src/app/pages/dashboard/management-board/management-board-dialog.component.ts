@@ -31,20 +31,19 @@ export interface ManagementBoardData {
 }
 
 @Component({
-  selector: 'app-management-board-dialog',
-  standalone: true,
-  imports: [
-    CommonModule,
-    ReactiveFormsModule,
-    FormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatButtonModule,
-    MatDialogModule,
-  ],
-  templateUrl: './management-board-dialog.component.html',
-  styleUrls: ['./management-board-dialog.component.scss'],
+    selector: 'app-management-board-dialog',
+    imports: [
+        CommonModule,
+        ReactiveFormsModule,
+        FormsModule,
+        MatFormFieldModule,
+        MatInputModule,
+        MatSelectModule,
+        MatButtonModule,
+        MatDialogModule,
+    ],
+    templateUrl: './management-board-dialog.component.html',
+    styleUrls: ['./management-board-dialog.component.scss']
 })
 export class ManagementBoardDialogComponent implements OnInit {
   managementBoardForm!: FormGroup;

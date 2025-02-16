@@ -35,21 +35,20 @@ export interface AnnouncementData {
 }
 
 @Component({
-  selector: 'app-announcements',
-  standalone: true,
-  imports: [
-    CommonModule,
-    MatTableModule,
-    MatSortModule,
-    MatPaginatorModule,
-    MatButtonModule,
-    MatIconModule,
-    MatInputModule,
-    MatFormFieldModule,
-  ],
-  providers: [DatePipe],
-  templateUrl: './announcements.component.html',
-  styleUrls: ['./announcements.component.scss'],
+    selector: 'app-announcements',
+    imports: [
+        CommonModule,
+        MatTableModule,
+        MatSortModule,
+        MatPaginatorModule,
+        MatButtonModule,
+        MatIconModule,
+        MatInputModule,
+        MatFormFieldModule,
+    ],
+    providers: [DatePipe],
+    templateUrl: './announcements.component.html',
+    styleUrls: ['./announcements.component.scss']
 })
 export class AnnouncementsComponent implements OnInit {
   displayedColumns: string[] = [

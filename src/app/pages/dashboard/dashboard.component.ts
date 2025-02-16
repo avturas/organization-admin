@@ -21,24 +21,23 @@ const TYPE_TEXTS = {
 };
 
 @Component({
-  selector: 'app-dashboard',
-  standalone: true,
-  imports: [
-    MatExpansionModule,
-    MatTooltipModule,
-    MatToolbarModule,
-    MatListModule,
-    MatIconModule,
-    MatMenuModule,
-    MatSidenavModule,
-    RouterModule,
-    FormsModule,
-    MatButtonModule,
-    MatDialogModule,
-    CommonModule,
-  ],
-  templateUrl: './dashboard.component.html',
-  styleUrls: ['./dashboard.component.scss'],
+    selector: 'app-dashboard',
+    imports: [
+        MatExpansionModule,
+        MatTooltipModule,
+        MatToolbarModule,
+        MatListModule,
+        MatIconModule,
+        MatMenuModule,
+        MatSidenavModule,
+        RouterModule,
+        FormsModule,
+        MatButtonModule,
+        MatDialogModule,
+        CommonModule,
+    ],
+    templateUrl: './dashboard.component.html',
+    styleUrls: ['./dashboard.component.scss']
 })
 export class DashboardComponent implements OnInit, OnDestroy {
   public phoneNumber = '';
