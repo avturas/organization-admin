@@ -34,19 +34,19 @@ export interface EventData {
 }
 
 @Component({
-    selector: 'app-events',
-    imports: [
-        CommonModule,
-        MatTableModule,
-        MatSortModule,
-        MatPaginatorModule,
-        MatButtonModule,
-        MatIconModule,
-        MatInputModule,
-        MatFormFieldModule,
-    ],
-    templateUrl: './events.component.html',
-    styleUrls: ['./events.component.scss']
+  selector: 'app-events',
+  imports: [
+    CommonModule,
+    MatTableModule,
+    MatSortModule,
+    MatPaginatorModule,
+    MatButtonModule,
+    MatIconModule,
+    MatInputModule,
+    MatFormFieldModule,
+  ],
+  templateUrl: './events.component.html',
+  styleUrls: ['./events.component.scss'],
 })
 export class EventsComponent implements OnInit {
   dataSource = new MatTableDataSource<EventData>();
@@ -186,7 +186,7 @@ export class EventsComponent implements OnInit {
       throw new Error('Invalid role or missing role information');
     }
 
-    const querySnapshot = await getDocs(queryRef); // Fetch data from Firestore
+    const querySnapshot = await getDocs(queryRef);
     querySnapshot.forEach((doc) => {
       events.push({
         id: doc.id,
@@ -194,7 +194,7 @@ export class EventsComponent implements OnInit {
       } as EventData);
     });
 
-    this.dataSource = new MatTableDataSource(events); // Update table data source
+    this.dataSource = new MatTableDataSource(events);
   }
 
   openDisplayDialog(eventData: EventData): void {
