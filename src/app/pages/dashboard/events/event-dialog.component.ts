@@ -30,6 +30,8 @@ import { AuthService } from '../../../auth.service';
 import { DISTRICTS } from '../../../shared/districts';
 import { MatIconModule } from '@angular/material/icon';
 
+import { collection, doc, getFirestore } from '@angular/fire/firestore';
+
 export interface EventData {
   id?: string;
   owner: string;
@@ -58,22 +60,22 @@ const EVENT_TYPE_OWNER_TEXT = {
 };
 
 @Component({
-    selector: 'app-event-dialog',
-    imports: [
-        CommonModule,
-        ReactiveFormsModule,
-        FormsModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatSelectModule,
-        MatButtonModule,
-        MatDialogModule,
-        MatDatepickerModule,
-        MatNativeDateModule,
-        MatIconModule,
-    ],
-    templateUrl: './event-dialog.html',
-    styleUrls: ['./event-dialog.scss']
+  selector: 'app-event-dialog',
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    FormsModule,
+    MatFormFieldModule,
+    MatInputModule,
+    MatSelectModule,
+    MatButtonModule,
+    MatDialogModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatIconModule,
+  ],
+  templateUrl: './event-dialog.html',
+  styleUrls: ['./event-dialog.scss'],
 })
 export class EventDialogComponent implements OnInit {
   eventForm!: FormGroup;
@@ -220,9 +222,15 @@ export class EventDialogComponent implements OnInit {
 
   async onSubmit(): Promise<void> {
     if (this.eventForm.valid) {
+      const oldImageUrl = this.data?.event?.imageUrl;
       if (this.selectedFile) {
         const storage = getStorage();
-        const filePath = `events/${Date.now()}_${this.selectedFile.name}`;
+        const firestore = getFirestore();
+        const eventId =
+          this.data?.event?.id || doc(collection(firestore, 'events')).id;
+        const filePath = `events/${eventId}/${Date.now()}_${
+          this.selectedFile.name
+        }`;
         const fileRef = ref(storage, filePath);
         const formValue = { ...this.eventForm.value };
 
@@ -230,7 +238,18 @@ export class EventDialogComponent implements OnInit {
           formValue.date = new Date(formValue.date).toISOString();
         }
 
-        const uploadTask = uploadBytesResumable(fileRef, this.selectedFile);
+        const metadata = {
+          customMetadata: {
+            city: formValue.city,
+            district: formValue.district,
+          },
+        };
+
+        const uploadTask = uploadBytesResumable(
+          fileRef,
+          this.selectedFile,
+          metadata
+        );
 
         uploadTask.on(
           'state_changed',
@@ -244,6 +263,10 @@ export class EventDialogComponent implements OnInit {
           async () => {
             const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
             formValue.imageUrl = downloadURL;
+
+            if (oldImageUrl && oldImageUrl !== downloadURL) {
+              formValue._oldImageUrl = oldImageUrl;
+            }
             this.dialogRef.close(formValue);
           }
         );

@@ -35,20 +35,20 @@ export interface AnnouncementData {
 }
 
 @Component({
-    selector: 'app-announcements',
-    imports: [
-        CommonModule,
-        MatTableModule,
-        MatSortModule,
-        MatPaginatorModule,
-        MatButtonModule,
-        MatIconModule,
-        MatInputModule,
-        MatFormFieldModule,
-    ],
-    providers: [DatePipe],
-    templateUrl: './announcements.component.html',
-    styleUrls: ['./announcements.component.scss']
+  selector: 'app-announcements',
+  imports: [
+    CommonModule,
+    MatTableModule,
+    MatSortModule,
+    MatPaginatorModule,
+    MatButtonModule,
+    MatIconModule,
+    MatInputModule,
+    MatFormFieldModule,
+  ],
+  providers: [DatePipe],
+  templateUrl: './announcements.component.html',
+  styleUrls: ['./announcements.component.scss'],
 })
 export class AnnouncementsComponent implements OnInit {
   displayedColumns: string[] = [
@@ -81,52 +81,64 @@ export class AnnouncementsComponent implements OnInit {
     const announcements: AnnouncementData[] = [];
     const firestore = getFirestore();
 
-    const currentUserRole = this.authService.getUserRole();
-    const currentUserCity = this.authService.getUserCity();
-    const currentUserDistrict = this.authService.getUserDistrict();
+    const role = this.authService.getUserRole();
+    const city = this.authService.getUserCity();
+    const district = this.authService.getUserDistrict();
 
-    let queryRef: Query<DocumentData>;
+    if (!role) {
+      console.warn('No role found in user claims.');
+      return;
+    }
 
-    if (currentUserRole === 'headquarters') {
-      queryRef = collection(firestore, 'announcements') as Query<DocumentData>;
-      const querySnapshot = await getDocs(queryRef);
+    const baseRef = collection(firestore, 'announcements');
 
-      querySnapshot.forEach((doc) => {
-        announcements.push({
-          id: doc.id,
-          ...doc.data(),
-        } as AnnouncementData);
-      });
-    } else if (currentUserRole === 'city' || currentUserRole === 'district') {
-      const everyoneQuery = query(
-        collection(firestore, 'announcements'),
-        where('audienceType', '==', 'everyone')
+    const queries: Query<DocumentData>[] = [];
+
+    queries.push(query(baseRef, where('audienceType', '==', 'everyone')));
+
+    if (role === 'headquarters') {
+      queries.push(query(baseRef, where('audienceType', '==', 'headquarters')));
+      queries.push(query(baseRef, where('audienceType', '==', 'city')));
+      queries.push(query(baseRef, where('audienceType', '==', 'district')));
+    }
+
+    if (role === 'city' && city) {
+      queries.push(
+        query(
+          baseRef,
+          where('audienceType', '==', 'city'),
+          where('city', '==', city)
+        )
       );
+      queries.push(
+        query(
+          baseRef,
+          where('audienceType', '==', 'district'),
+          where('city', '==', city)
+        )
+      );
+    }
 
-      const roleSpecificQuery =
-        currentUserRole === 'city'
-          ? query(
-              collection(firestore, 'announcements'),
-              where('city', '==', currentUserCity),
-              where('audienceType', 'in', ['city', 'district'])
-            )
-          : query(
-              collection(firestore, 'announcements'),
-              where('district', '==', currentUserDistrict),
-              where('audienceType', '==', 'district')
-            );
+    if (role === 'district' && city && district) {
+      queries.push(
+        query(
+          baseRef,
+          where('audienceType', '==', 'district'),
+          where('city', '==', city),
+          where('district', '==', district)
+        )
+      );
+    }
 
-      const [everyoneSnapshot, roleSpecificSnapshot] = await Promise.all([
-        getDocs(everyoneQuery),
-        getDocs(roleSpecificQuery),
-      ]);
+    const snapshots = await Promise.all(queries.map((q) => getDocs(q)));
 
-      everyoneSnapshot.forEach((doc) => {
-        announcements.push({ id: doc.id, ...doc.data() } as AnnouncementData);
-      });
-
-      roleSpecificSnapshot.forEach((doc) => {
-        announcements.push({ id: doc.id, ...doc.data() } as AnnouncementData);
+    const seen = new Set<string>();
+    for (const snap of snapshots) {
+      snap.forEach((doc) => {
+        if (!seen.has(doc.id)) {
+          announcements.push({ id: doc.id, ...doc.data() } as AnnouncementData);
+          seen.add(doc.id);
+        }
       });
     }
 

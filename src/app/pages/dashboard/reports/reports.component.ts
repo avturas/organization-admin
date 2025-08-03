@@ -44,21 +44,21 @@ function convertTurkishToEnglish(text: string): string {
 }
 
 @Component({
-    selector: 'app-reports',
-    imports: [
-        CommonModule,
-        MatFormFieldModule,
-        MatSelectModule,
-        MatButtonModule,
-        MatCardModule,
-        MatDatepickerModule,
-        MatNativeDateModule,
-        MatInputModule,
-        BaseChartDirective,
-        FormsModule,
-    ],
-    templateUrl: './reports.component.html',
-    styleUrls: ['./reports.component.scss']
+  selector: 'app-reports',
+  imports: [
+    CommonModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatButtonModule,
+    MatCardModule,
+    MatDatepickerModule,
+    MatNativeDateModule,
+    MatInputModule,
+    BaseChartDirective,
+    FormsModule,
+  ],
+  templateUrl: './reports.component.html',
+  styleUrls: ['./reports.component.scss'],
 })
 export class ReportsComponent implements OnInit {
   availableCities = Object.entries(CITIES).map(([key, value]) => ({
@@ -203,25 +203,45 @@ export class ReportsComponent implements OnInit {
   }): Promise<void> {
     const firestore = getFirestore();
     const eventsRef = collection(firestore, 'events');
-    let queries = [];
 
-    if (filters.city) {
-      queries.push(where('city', '==', filters.city));
+    const userRole = this.authService.getUserRole();
+    const userCity = this.authService.getUserCity();
+    const userDistrict = this.authService.getUserDistrict();
+
+    const queryConstraints = [];
+
+    if (userRole === 'city' && userCity) {
+      queryConstraints.push(where('city', '==', userCity));
+      if (filters.district) {
+        queryConstraints.push(where('district', '==', filters.district));
+      }
     }
-    if (filters.district) {
-      queries.push(where('district', '==', filters.district));
+
+    if (userRole === 'district' && userCity && userDistrict) {
+      queryConstraints.push(where('city', '==', userCity));
+      queryConstraints.push(where('district', '==', userDistrict));
     }
+
     if (filters.startDate) {
-      queries.push(where('date', '>=', filters.startDate.toISOString()));
+      queryConstraints.push(
+        where('date', '>=', filters.startDate.toISOString())
+      );
     }
     if (filters.endDate) {
-      queries.push(where('date', '<=', filters.endDate.toISOString()));
+      queryConstraints.push(where('date', '<=', filters.endDate.toISOString()));
     }
 
-    const q = query(eventsRef, ...queries);
-    const querySnapshot = await getDocs(q);
+    if (userRole === 'headquarters') {
+      if (filters.city)
+        queryConstraints.push(where('city', '==', filters.city));
+      if (filters.district)
+        queryConstraints.push(where('district', '==', filters.district));
+    }
 
-    const eventData = querySnapshot.docs.map((doc) => doc.data() as any);
+    const q = query(eventsRef, ...queryConstraints);
+    const snapshot = await getDocs(q);
+    const eventData = snapshot.docs.map((doc) => doc.data());
+
     this.totalEventCount = eventData.length;
     this.updateCharts(eventData);
   }

@@ -128,8 +128,8 @@ export class EventsComponent implements OnInit {
           const eventRef = doc(firestore, 'events', row.id);
           await updateDoc(eventRef, result);
 
-          if (row.imageUrl && result.imageUrl !== row.imageUrl) {
-            await this.deleteImageFromStorage(row.imageUrl);
+          if (result._oldImageUrl && result._oldImageUrl !== result.imageUrl) {
+            await this.deleteImageFromStorage(result._oldImageUrl);
           }
           this.getEvents();
         } catch (error) {
@@ -180,6 +180,7 @@ export class EventsComponent implements OnInit {
     } else if (currentUserRole === 'district') {
       queryRef = query(
         collection(firestore, 'events'),
+        where('city', '==', currentUserCity),
         where('district', '==', currentUserDistrict)
       );
     } else {

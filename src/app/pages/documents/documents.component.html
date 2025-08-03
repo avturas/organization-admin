@@ -1,85 +1,139 @@
-<div class="documents-wrapper">
-  <div *ngIf="isHeadquartersUser" class="upload-section">
-    <div class="file-upload">
-      <input
-        #fileInput
-        id="fileInput"
-        type="file"
-        style="display: none"
-        (change)="onFileSelected($event)"
-      />
+<div class="upload-container">
+  <form [formGroup]="uploadForm" (ngSubmit)="uploadFile()" class="upload-form">
+    <div class="audience-type-wrapper">
+      <mat-form-field appearance="fill">
+        <mat-label>Hedef Kitle</mat-label>
+        <mat-select formControlName="audienceType" required>
+          <mat-option
+            *ngFor="let type of availableAudienceTypes"
+            [value]="type.value"
+          >
+            {{ type.label }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
 
-      <button mat-raised-button color="primary" (click)="triggerFileInput()">
-        Belge Seç
-      </button>
+      <mat-form-field appearance="fill" *ngIf="showCityField">
+        <mat-label>Şehir</mat-label>
+        <mat-select
+          formControlName="city"
+          (selectionChange)="onCityChange($event.value)"
+        >
+          <mat-option *ngFor="let city of availableCities" [value]="city.value">
+            {{ city.value }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
 
-      <span *ngIf="selectedFile">{{ selectedFile.name }}</span>
-    </div>
-    <button
-      mat-raised-button
-      color="accent"
-      [disabled]="!selectedFile"
-      (click)="uploadFile()"
-    >
-      Yükle
-    </button>
-  </div>
+      <mat-form-field appearance="fill" *ngIf="showDistrictField">
+        <mat-label>İlçe</mat-label>
+        <mat-select formControlName="district">
+          <mat-option
+            *ngFor="let district of filteredDistricts"
+            [value]="district"
+          >
+            {{ district }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
 
-  <mat-form-field>
-    <mat-label>Filtrele</mat-label>
-    <input
-      matInput
-      (keyup)="applyFilter($event)"
-      placeholder="Filter by name"
-    />
-  </mat-form-field>
-
-  <mat-table [dataSource]="dataSource" matSort>
-    <ng-container matColumnDef="fileName">
-      <mat-header-cell *matHeaderCellDef mat-sort-header
-        >Belge Adı</mat-header-cell
+      <button
+        mat-raised-button
+        color="primary"
+        type="button"
+        (click)="triggerFileInput()"
       >
-      <mat-cell *matCellDef="let file">{{ file.fileName }}</mat-cell>
+        Dosya Seç
+      </button>
+      <input type="file" hidden #fileInput (change)="onFileSelected($event)" />
+      <span *ngIf="selectedFile">{{ selectedFile.name }}</span>
+
+      <button
+        mat-raised-button
+        color="accent"
+        type="submit"
+        [disabled]="!uploadForm.valid || !selectedFile"
+      >
+        Yükle
+      </button>
+    </div>
+  </form>
+</div>
+
+<hr />
+
+<div class="documents-table">
+  <table
+    mat-table
+    [dataSource]="dataSource"
+    class="mat-elevation-z8"
+    *ngIf="dataSource.data.length > 0"
+  >
+    <ng-container matColumnDef="fileName">
+      <th mat-header-cell *matHeaderCellDef>Dosya Adı</th>
+      <td mat-cell *matCellDef="let element">{{ element.fileName }}</td>
     </ng-container>
 
     <ng-container matColumnDef="uploadedBy">
-      <mat-header-cell *matHeaderCellDef mat-sort-header
-        >Yükleyen</mat-header-cell
-      >
-      <mat-cell *matCellDef="let file">{{ file.uploadedBy }}</mat-cell>
+      <th mat-header-cell *matHeaderCellDef>Yükleyen</th>
+      <td mat-cell *matCellDef="let element">{{ element.uploadedBy }}</td>
     </ng-container>
 
     <ng-container matColumnDef="uploadDate">
-      <mat-header-cell *matHeaderCellDef mat-sort-header
-        >Yükleme Tarihi</mat-header-cell
-      >
-      <mat-cell *matCellDef="let file">{{
-        file.uploadDate | date : "short"
-      }}</mat-cell>
+      <th mat-header-cell *matHeaderCellDef>Tarih</th>
+      <td mat-cell *matCellDef="let element">
+        {{ element.uploadDate | date : "short" }}
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="audience">
+      <th mat-header-cell *matHeaderCellDef>Hedef</th>
+      <td mat-cell *matCellDef="let element">
+        <span *ngIf="element.city"> {{ element.city }}</span>
+        <span *ngIf="element.district"> / {{ element.district }}</span>
+      </td>
     </ng-container>
 
     <ng-container matColumnDef="actions">
-      <mat-header-cell *matHeaderCellDef>Aksiyonlar</mat-header-cell>
-      <mat-cell *matCellDef="let file">
+      <th mat-header-cell *matHeaderCellDef>İşlemler</th>
+      <td mat-cell *matCellDef="let element">
         <button
-          mat-icon-button
+          mat-button
           color="primary"
-          (click)="downloadFile(file.filePath)"
+          (click)="downloadFile(element.filePath)"
         >
-          <mat-icon>download</mat-icon>
+          İndir
         </button>
         <button
-          mat-icon-button
-          *ngIf="isHeadquartersUser"
+          mat-button
           color="warn"
-          (click)="deleteFile(file.id, file.filePath)"
+          (click)="deleteFile(element.id, element.filePath)"
         >
-          <mat-icon>delete</mat-icon>
+          Sil
         </button>
-      </mat-cell>
+      </td>
     </ng-container>
 
-    <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-    <mat-row *matRowDef="let row; columns: displayedColumns"></mat-row>
-  </mat-table>
+    <tr
+      mat-header-row
+      *matHeaderRowDef="[
+        'fileName',
+        'uploadedBy',
+        'uploadDate',
+        'audience',
+        'actions'
+      ]"
+    ></tr>
+    <tr
+      mat-row
+      *matRowDef="
+        let row;
+        columns: ['fileName', 'uploadedBy', 'uploadDate', 'audience', 'actions']
+      "
+    ></tr>
+  </table>
+
+  <p *ngIf="dataSource.data.length === 0" class="no-documents">
+    Henüz yüklenmiş dosya yok.
+  </p>
 </div>

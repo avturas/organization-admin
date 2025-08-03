@@ -1,4 +1,4 @@
-@use '@angular/material' as mat;
+@use "@angular/material" as mat;
 
 html,
 body {
@@ -8,18 +8,19 @@ body {
 
 $primary-palette: mat.$azure-palette;
 
-$background-color: #ffffff; 
+$background-color: #ffffff;
 $surface-color: #ffffff;
 
-
-$my-theme: mat.define-theme((
-  color: (
-    primary: $primary-palette,
-  ),
-  typography: (
-    brand-family: "Roboto, sans-serif"
+$my-theme: mat.define-theme(
+  (
+    color: (
+      primary: $primary-palette,
+    ),
+    typography: (
+      brand-family: "Roboto, sans-serif",
+    ),
   )
-));
+);
 
 :root {
   @include mat.all-component-themes($my-theme);
@@ -37,12 +38,10 @@ $my-theme: mat.define-theme((
   box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.2);
 }
 
-
 .mat-toolbar {
   background-color: var(--custom-surface-color);
   color: var(--md-sys-color-on-surface);
 }
-
 
 mat-sidenav-content {
   background-color: var(--custom-background-color);

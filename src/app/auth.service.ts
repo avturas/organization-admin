@@ -12,8 +12,10 @@ import {
   where,
   getDocs,
   Firestore,
+  Query,
 } from '@angular/fire/firestore';
 import { Router } from '@angular/router';
+import { getFunctions, httpsCallable } from '@angular/fire/functions';
 
 @Injectable({
   providedIn: 'root',
@@ -44,7 +46,8 @@ export class AuthService {
   constructor(private router: Router) {
     this.auth.onAuthStateChanged(async (user) => {
       if (user) {
-        await this.fetchUserRole(user.phoneNumber!);
+        await this.callSyncCustomClaimsClaimsFunction();
+        await this.fetchUserRoleFromToken();
         this.user = user;
         this.setAuthSecret(await user.getIdToken());
         this.isAuthenticated = true;
@@ -61,7 +64,7 @@ export class AuthService {
           }
         } catch (error) {
           console.error('Error checking user confirmation:', error);
-          this.router.navigate(['/error']); // Optional: Redirect to error page
+          this.router.navigate(['/error']);
         }
       } else {
         this.clearAuthState();
@@ -69,22 +72,64 @@ export class AuthService {
     });
   }
 
-  async fetchUserRole(phoneNumber: string) {
-    const userRef = collection(this.firestore, 'users');
-    const q = query(userRef, where('phoneNumber', '==', phoneNumber));
-    const querySnapshot = await getDocs(q);
+  private async callSyncCustomClaimsClaimsFunction(): Promise<void> {
+    const alreadySynced = localStorage.getItem('claimsSynced');
+    if (alreadySynced) {
+      return;
+    }
 
-    if (!querySnapshot.empty) {
-      const userData = querySnapshot.docs[0].data();
-      this.role = userData['role'];
-      this.city = userData['city'];
-      this.district = userData['district'];
-      this.userInfo = {
-        name: userData['name'] + ' ' + userData['surname'],
-        email: userData['email'],
-      };
+    try {
+      const functions = getFunctions();
+      const setClaims = httpsCallable(functions, 'syncCustomClaims');
+      await setClaims();
+
+      await this.auth.currentUser?.getIdToken(true);
+
+      localStorage.setItem('claimsSynced', 'true');
+    } catch (error) {
+      console.error('Error syncing custom claims:', error);
+    }
+  }
+
+  private async fetchUserDisplayInfo(): Promise<void> {
+    const phoneNumber = this.auth.currentUser?.phoneNumber;
+    if (!phoneNumber) return;
+
+    try {
+      const q = this.buildScopedUserQuery(phoneNumber);
+      const snapshot = await getDocs(q);
+
+      const userData = snapshot.docs[0]?.data();
+
+      if (userData) {
+        this.userInfo = {
+          name: `${userData['name']} ${userData['surname']}`,
+          email: userData['email'],
+        };
+      } else {
+        console.error('User not found in Firestore.');
+      }
+    } catch (error) {
+      console.error('Error fetching user info:', error);
+      throw error;
+    }
+  }
+
+  async fetchUserRoleFromToken(): Promise<void> {
+    const idTokenResult = await this.auth.currentUser?.getIdTokenResult(true);
+    const claims = idTokenResult?.claims;
+
+    if (claims) {
+      this.role = (claims['role'] as string) || null;
+      this.city = typeof claims['city'] === 'string' ? claims['city'] : null;
+      this.district =
+        typeof claims['district'] === 'string' || claims['district'] === null
+          ? claims['district']
+          : null;
+
+      await this.fetchUserDisplayInfo();
     } else {
-      console.error('User not found in Firestore.');
+      console.error('No custom claims found in ID token');
     }
   }
 
@@ -133,11 +178,41 @@ export class AuthService {
   }
 
   async checkUserConfirmation(phoneNumber: string): Promise<boolean> {
-    const userRef = collection(this.firestore, 'users');
-    const q = query(userRef, where('phoneNumber', '==', phoneNumber));
-    const querySnapshot = await getDocs(q);
+    try {
+      const q = this.buildScopedUserQuery(phoneNumber);
+      const snapshot = await getDocs(q);
+      return snapshot.docs.length > 0;
+    } catch (error) {
+      console.error('Error checking user confirmation:', error);
+      return false;
+    }
+  }
 
-    return querySnapshot.docs.length > 0;
+  private buildScopedUserQuery(phoneNumber: string): Query {
+    const userRef = collection(this.firestore, 'users');
+
+    if (this.role === 'headquarters') {
+      return query(userRef, where('phoneNumber', '==', phoneNumber));
+    }
+
+    if (this.role === 'city' && this.city) {
+      return query(
+        userRef,
+        where('phoneNumber', '==', phoneNumber),
+        where('city', '==', this.city)
+      );
+    }
+
+    if (this.role === 'district' && this.city && this.district) {
+      return query(
+        userRef,
+        where('phoneNumber', '==', phoneNumber),
+        where('city', '==', this.city),
+        where('district', '==', this.district)
+      );
+    }
+
+    throw new Error('Invalid role or missing city/district in claims');
   }
 
   setIsConfirmed(confirmed: boolean): void {
@@ -162,6 +237,7 @@ export class AuthService {
 
   clearAuthState(): void {
     localStorage.removeItem(this.authSecretKey);
+    localStorage.removeItem('claimsSynced');
     this.isAuthenticated = false;
     this.isConfirmed = false;
     this.user = null;

@@ -36,21 +36,21 @@ export interface ExecutiveCommitteeData {
 }
 
 @Component({
-    selector: 'app-executive-committee',
-    imports: [
-        CommonModule,
-        MatTableModule,
-        MatSortModule,
-        MatPaginatorModule,
-        MatButtonModule,
-        MatIconModule,
-        MatInputModule,
-        MatFormFieldModule,
-        MatCheckboxModule,
-        FormsModule,
-    ],
-    templateUrl: './executive-committee.component.html',
-    styleUrls: ['./executive-committee.component.scss']
+  selector: 'app-executive-committee',
+  imports: [
+    CommonModule,
+    MatTableModule,
+    MatSortModule,
+    MatPaginatorModule,
+    MatButtonModule,
+    MatIconModule,
+    MatInputModule,
+    MatFormFieldModule,
+    MatCheckboxModule,
+    FormsModule,
+  ],
+  templateUrl: './executive-committee.component.html',
+  styleUrls: ['./executive-committee.component.scss'],
 })
 export class ExecutiveCommitteeComponent implements OnInit {
   displayedColumns: string[] = ['name', 'role', 'city', 'district', 'actions'];
@@ -83,55 +83,50 @@ export class ExecutiveCommitteeComponent implements OnInit {
 
   async getExecutiveCommittee(): Promise<void> {
     const firestore = getFirestore();
-    const currentUserRole = this.authService.getUserRole();
-    const currentUserCity = this.authService.getUserCity();
-    const currentUserDistrict = this.authService.getUserDistrict();
+    const role = this.authService.getUserRole();
+    const city = this.authService.getUserCity();
+    const district = this.authService.getUserDistrict();
+
+    const baseRef = collection(firestore, 'executiveCommittees');
+    const committeeMembers: ExecutiveCommitteeData[] = [];
 
     let queryRef: Query<DocumentData>;
 
-    if (currentUserRole === 'headquarters') {
-      queryRef = collection(
-        firestore,
-        'executiveCommittees'
-      ) as Query<DocumentData>;
-      if (this.onlyDisplayHeadquarters) {
-        queryRef = query(
-          collection(firestore, 'executiveCommittees'),
-          where('city', '==', null),
-          where('district', '==', null)
-        );
-      }
-    } else if (currentUserRole === 'city') {
+    if (role === 'headquarters') {
+      queryRef = baseRef as Query<DocumentData>;
+    } else if (role === 'city' && city) {
+      queryRef = query(baseRef, where('city', '==', city));
+    } else if (role === 'district' && city && district) {
       queryRef = query(
-        collection(firestore, 'executiveCommittees'),
-        where('city', '==', currentUserCity)
-      );
-      if (this.onlyDisplayCityUsers) {
-        queryRef = query(
-          collection(firestore, 'executiveCommittees'),
-          where('city', '==', currentUserCity),
-          where('district', '==', null)
-        );
-      }
-    } else if (currentUserRole === 'district') {
-      queryRef = query(
-        collection(firestore, 'executiveCommittees'),
-        where('district', '==', currentUserDistrict)
+        baseRef,
+        where('city', '==', city),
+        where('district', '==', district)
       );
     } else {
-      throw new Error('Invalid user role');
+      console.warn('Invalid role or missing location info');
+      return;
     }
 
-    const querySnapshot = await getDocs(queryRef);
-    const committeeMembers: ExecutiveCommitteeData[] = [];
-    querySnapshot.forEach((doc) => {
+    const snapshot = await getDocs(queryRef);
+
+    snapshot.forEach((doc) => {
       committeeMembers.push({
         id: doc.id,
         ...doc.data(),
       } as ExecutiveCommitteeData);
     });
 
-    this.dataSource = new MatTableDataSource(committeeMembers);
+    const filtered = committeeMembers.filter((member) => {
+      if (this.onlyDisplayHeadquarters) {
+        return !member.city && !member.district;
+      }
+      if (this.onlyDisplayCityUsers) {
+        return member.city && !member.district;
+      }
+      return true;
+    });
+
+    this.dataSource = new MatTableDataSource(filtered);
   }
 
   onAddNewMember(): void {

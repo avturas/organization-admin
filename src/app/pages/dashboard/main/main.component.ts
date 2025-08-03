@@ -37,10 +37,10 @@ interface AnnouncementData {
 }
 
 @Component({
-    selector: 'app-main',
-    imports: [MatCardModule, CommonModule, MatIconModule],
-    templateUrl: './main.component.html',
-    styleUrls: ['./main.component.scss']
+  selector: 'app-main',
+  imports: [MatCardModule, CommonModule, MatIconModule],
+  templateUrl: './main.component.html',
+  styleUrls: ['./main.component.scss'],
 })
 export class MainComponent implements OnInit {
   userInfo = {
@@ -61,11 +61,11 @@ export class MainComponent implements OnInit {
 
   constructor(private authService: AuthService) {}
 
-  ngOnInit(): void {
-    this.loadUserInfo();
-    this.loadLastFiveEvents();
-    this.loadUpcomingFiveEvents();
-    this.loadLatestAnnouncements();
+  async ngOnInit(): Promise<void> {
+    await this.loadUserInfo();
+    await this.loadLastFiveEvents();
+    await this.loadUpcomingFiveEvents();
+    await this.loadLatestAnnouncements();
   }
 
   private async loadUserInfo(): Promise<void> {
@@ -111,6 +111,7 @@ export class MainComponent implements OnInit {
     } else if (userRole === 'district' && userDistrict) {
       q = query(
         eventsRef,
+        where('city', '==', userCity),
         where('district', '==', userDistrict),
         where('date', '<', today),
         orderBy('date', 'desc'),
@@ -153,6 +154,7 @@ export class MainComponent implements OnInit {
     } else if (userRole === 'district' && userDistrict) {
       q = query(
         eventsRef,
+        where('city', '==', userCity),
         where('district', '==', userDistrict),
         where('date', '>=', today),
         orderBy('date', 'asc'),
@@ -176,33 +178,65 @@ export class MainComponent implements OnInit {
     const userCity = this.authService.getUserCity();
     const userDistrict = this.authService.getUserDistrict();
 
-    let q: Query<DocumentData>;
+    const queries: Query<DocumentData>[] = [];
+
+    queries.push(
+      query(announcementsRef, where('audienceType', '==', 'everyone'))
+    );
 
     if (userRole === 'headquarters') {
-      q = query(announcementsRef, orderBy('date', 'desc'), limit(10));
-    } else if (userRole === 'city' && userCity) {
-      q = query(
-        announcementsRef,
-        where('audienceType', 'in', ['everyone', 'city']),
-        where('city', '==', userCity),
-        orderBy('date', 'desc'),
-        limit(10)
+      queries.push(
+        query(announcementsRef, where('audienceType', '==', 'headquarters'))
       );
-    } else if (userRole === 'district' && userDistrict) {
-      q = query(
-        announcementsRef,
-        where('audienceType', 'in', ['everyone', 'district']),
-        where('district', '==', userDistrict),
-        orderBy('date', 'desc'),
-        limit(10)
+      queries.push(
+        query(announcementsRef, where('audienceType', '==', 'city'))
       );
-    } else {
-      throw new Error('Invalid user role or missing user data');
+      queries.push(
+        query(announcementsRef, where('audienceType', '==', 'district'))
+      );
     }
 
-    const snapshot = await getDocs(q);
-    this.latestAnnouncements = snapshot.docs.map(
-      (doc) => doc.data() as AnnouncementData
-    );
+    if (userRole === 'city' && userCity) {
+      queries.push(
+        query(
+          announcementsRef,
+          where('audienceType', '==', 'city'),
+          where('city', '==', userCity)
+        )
+      );
+      queries.push(
+        query(
+          announcementsRef,
+          where('audienceType', '==', 'district'),
+          where('city', '==', userCity)
+        )
+      );
+    }
+
+    if (userRole === 'district' && userCity && userDistrict) {
+      queries.push(
+        query(
+          announcementsRef,
+          where('audienceType', '==', 'district'),
+          where('city', '==', userCity),
+          where('district', '==', userDistrict)
+        )
+      );
+    }
+
+    const snapshots = await Promise.all(queries.map((q) => getDocs(q)));
+
+    const seen = new Set<string>();
+    const announcements: AnnouncementData[] = [];
+    for (const snap of snapshots) {
+      snap.forEach((doc) => {
+        if (!seen.has(doc.id)) {
+          announcements.push(doc.data() as AnnouncementData);
+          seen.add(doc.id);
+        }
+      });
+    }
+
+    this.latestAnnouncements = announcements;
   }
 }

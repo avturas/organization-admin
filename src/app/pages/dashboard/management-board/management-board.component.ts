@@ -36,21 +36,21 @@ export interface ManagementBoardData {
 }
 
 @Component({
-    selector: 'app-management-board',
-    imports: [
-        CommonModule,
-        MatTableModule,
-        MatSortModule,
-        MatPaginatorModule,
-        MatButtonModule,
-        MatIconModule,
-        MatInputModule,
-        MatFormFieldModule,
-        MatCheckboxModule,
-        FormsModule,
-    ],
-    templateUrl: './management-board.component.html',
-    styleUrls: ['./management-board.component.scss']
+  selector: 'app-management-board',
+  imports: [
+    CommonModule,
+    MatTableModule,
+    MatSortModule,
+    MatPaginatorModule,
+    MatButtonModule,
+    MatIconModule,
+    MatInputModule,
+    MatFormFieldModule,
+    MatCheckboxModule,
+    FormsModule,
+  ],
+  templateUrl: './management-board.component.html',
+  styleUrls: ['./management-board.component.scss'],
 })
 export class ManagementBoardComponent implements OnInit {
   displayedColumns: string[] = ['name', 'role', 'city', 'district', 'actions'];
@@ -83,55 +83,47 @@ export class ManagementBoardComponent implements OnInit {
 
   async getManagementBoard(): Promise<void> {
     const firestore = getFirestore();
-    const currentUserRole = this.authService.getUserRole();
-    const currentUserCity = this.authService.getUserCity();
-    const currentUserDistrict = this.authService.getUserDistrict();
+    const role = this.authService.getUserRole();
+    const city = this.authService.getUserCity();
+    const district = this.authService.getUserDistrict();
+
+    const baseRef = collection(firestore, 'managementBoards');
+    const members: ManagementBoardData[] = [];
 
     let queryRef: Query<DocumentData>;
 
-    if (currentUserRole === 'headquarters') {
-      queryRef = collection(
-        firestore,
-        'managementBoards'
-      ) as Query<DocumentData>;
-      if (this.onlyDisplayHeadquarters) {
-        queryRef = query(
-          collection(firestore, 'managementBoards'),
-          where('city', '==', null),
-          where('district', '==', null)
-        );
-      }
-    } else if (currentUserRole === 'city') {
+    if (role === 'headquarters') {
+      queryRef = baseRef as Query<DocumentData>;
+    } else if (role === 'city' && city) {
+      queryRef = query(baseRef, where('city', '==', city));
+    } else if (role === 'district' && city && district) {
       queryRef = query(
-        collection(firestore, 'managementBoards'),
-        where('city', '==', currentUserCity)
-      );
-      if (this.onlyDisplayCityUsers) {
-        queryRef = query(
-          collection(firestore, 'managementBoards'),
-          where('city', '==', currentUserCity),
-          where('district', '==', null)
-        );
-      }
-    } else if (currentUserRole === 'district') {
-      queryRef = query(
-        collection(firestore, 'managementBoards'),
-        where('district', '==', currentUserDistrict)
+        baseRef,
+        where('city', '==', city),
+        where('district', '==', district)
       );
     } else {
-      throw new Error('Invalid user role');
+      console.warn('Invalid role or missing location info');
+      return;
     }
 
-    const querySnapshot = await getDocs(queryRef);
-    const managementMembers: ManagementBoardData[] = [];
-    querySnapshot.forEach((doc) => {
-      managementMembers.push({
-        id: doc.id,
-        ...doc.data(),
-      } as ManagementBoardData);
+    const snapshot = await getDocs(queryRef);
+
+    snapshot.forEach((doc) => {
+      members.push({ id: doc.id, ...doc.data() } as ManagementBoardData);
     });
 
-    this.dataSource = new MatTableDataSource(managementMembers);
+    const filtered = members.filter((member) => {
+      if (this.onlyDisplayHeadquarters) {
+        return !member.city && !member.district;
+      }
+      if (this.onlyDisplayCityUsers) {
+        return member.city && !member.district;
+      }
+      return true;
+    });
+
+    this.dataSource = new MatTableDataSource(filtered);
   }
 
   onAddNewMember(): void {
