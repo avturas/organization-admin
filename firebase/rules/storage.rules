@@ -1,0 +1,68 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    match /events/{eventId}/{fileName} {
+      
+      // Upload (write/create): check incoming metadata
+      allow write: if isAuthorizedToWrite();
+
+      // Download/delete (read/delete): check existing metadata
+      allow read, delete: if isAuthorizedToRead();
+    }
+    
+        // ----- Documents -----
+    match /documents/{fileName} {
+      allow write: if isAuthorizedToWrite();
+      allow read, delete: if isAuthorizedToRead();
+    }
+
+    function isAuthorizedToWrite() {
+      return request.auth != null && (
+        request.auth.token.role == 'headquarters' ||
+
+        (request.auth.token.role == 'city' &&
+          (
+            request.resource.metadata.audienceType == 'city' &&
+            request.resource.metadata.city == request.auth.token.city
+          ) ||
+
+          (
+            request.resource.metadata.audienceType == 'district' &&
+            request.resource.metadata.city == request.auth.token.city
+          )
+        ) ||
+
+        (request.auth.token.role == 'district' &&
+          request.resource.metadata.audienceType == 'district' &&
+          request.resource.metadata.district == request.auth.token.district)
+      );
+    }
+
+    function isAuthorizedToRead() {
+      return request.auth != null && (
+        request.auth.token.role == 'headquarters' ||
+
+        resource.metadata.audienceType == 'everyone' ||
+
+        (request.auth.token.role == 'city' &&
+          (
+            resource.metadata.audienceType == 'city' &&
+            resource.metadata.city == request.auth.token.city
+          ) ||
+
+          (
+            resource.metadata.audienceType == 'district' &&
+            resource.metadata.city == request.auth.token.city
+          )
+        ) ||
+
+        (request.auth.token.role == 'district' &&
+          resource.metadata.audienceType == 'district' &&
+          resource.metadata.district == request.auth.token.district)
+      );
+    }
+
+  }
+}

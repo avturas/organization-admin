@@ -1,0 +1,153 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ====================
+    // USERS COLLECTION
+    // ====================
+    match /users/{userId} {
+      allow read: if hasFullAccessTo(resource.data);
+      allow create: if hasFullAccessTo(request.resource.data);
+      allow update: if hasFullAccessTo(resource.data) &&
+                    hasFullAccessTo(request.resource.data);
+      allow delete: if hasFullAccessTo(resource.data);
+    }
+
+    // ====================
+    // EVENTS COLLECTION
+    // ====================
+    match /events/{eventId} {
+      allow read: if hasFullAccessTo(resource.data);
+      allow create, update: if hasFullAccessTo(request.resource.data);
+      allow delete: if hasFullAccessTo(resource.data);
+    }
+
+    // ====================
+    // ANNOUNCEMENTS COLLECTION
+    // ====================
+    match /announcements/{announcementId} {
+      allow read: if canViewRuleWithEveryone(resource.data);
+      allow create, update: if canCreateDocumentWithEveryone(request.resource.data);
+      allow delete: if hasFullAccessTo(resource.data);
+    }
+
+    // ====================
+    // EXECUTIVE COMMITTEES COLLECTION
+    // ====================
+    match /executiveCommittees/{committeeId} {
+      allow read: if hasFullAccessTo(resource.data);
+      allow create, update: if hasFullAccessTo(request.resource.data);
+      allow delete: if hasFullAccessTo(resource.data);
+    }
+
+    // ====================
+    // MANAGEMENT BOARDS COLLECTION
+    // ====================
+    match /managementBoards/{boardId} {
+      allow read: if hasFullAccessTo(resource.data);
+      allow create, update: if hasFullAccessTo(request.resource.data);
+      allow delete: if hasFullAccessTo(resource.data);
+    }
+
+    // ====================
+    // DOCUMENTS COLLECTION
+    // ====================
+    match /documents/{documentId} {
+      allow read: if canViewRuleWithEveryone(resource.data);
+      allow create, update: if canCreateDocumentWithEveryone(request.resource.data);
+      allow delete: if hasFullAccessTo(resource.data);
+    }
+  }
+
+  // ====================
+  // HELPER FUNCTIONS
+  // ====================
+
+  function isHeadquarters() {
+    return request.auth.token.role == 'headquarters';
+  }
+
+  function isCity() {
+    return request.auth.token.role == 'city';
+  }
+
+  function isDistrict() {
+    return request.auth.token.role == 'district';
+  }
+
+  function isSameCity(data) {
+    return data.city != null &&
+           request.auth.token.city != null &&
+           data.city == request.auth.token.city;
+  }
+
+  function isSameDistrict(data) {
+    return data.city != null &&
+           data.district != null &&
+           request.auth.token.city != null &&
+           request.auth.token.district != null &&
+           data.city == request.auth.token.city &&
+           data.district == request.auth.token.district;
+  }
+
+  function hasFullAccessTo(data) {
+    return isHeadquarters() ||
+           (isCity() && isSameCity(data)) ||
+           (isDistrict() && isSameDistrict(data));
+  }
+
+  function canViewRuleWithEveryone(data) {
+    let type = data.audienceType;
+    let city = data.city;
+    let district = data.district;
+
+    return
+      (type == 'everyone' && request.auth != null) ||
+      (type == 'headquarters' && isHeadquarters()) ||
+      (type == 'city' && (
+        isHeadquarters() ||
+        (isCity() && request.auth.token.city == city)
+      )) ||
+      (type == 'district' && (
+        isHeadquarters() ||
+        (isCity() && request.auth.token.city == city) ||
+        (isDistrict() &&
+          request.auth.token.city == city &&
+          request.auth.token.district == district)
+      ));
+  }
+
+  function isValidAudience(data) {
+    return data.audienceType in ['everyone', 'headquarters', 'city', 'district'] &&
+      (data.audienceType != 'city' || data.city != null) &&
+      (data.audienceType != 'district' || (data.city != null && data.district != null));
+  }
+  
+  
+  function canCreateDocumentWithEveryone(data) {
+    return isValidAudience(data) &&
+      (
+        (data.audienceType == 'everyone' && isHeadquarters()) ||
+
+        (data.audienceType == 'headquarters' && isHeadquarters()) ||
+
+        (data.audienceType == 'city' &&
+          (
+            isHeadquarters() ||
+            (isCity() && data.city == request.auth.token.city)
+          )
+        ) ||
+
+        (data.audienceType == 'district' &&
+          (
+            isHeadquarters() ||
+            (isCity() && data.city == request.auth.token.city) ||
+            (isDistrict() &&
+              data.city == request.auth.token.city &&
+              data.district == request.auth.token.district)
+          )
+        )
+      );
+  }
+
+}
