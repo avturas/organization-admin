@@ -51,8 +51,8 @@ firebase.json.example
 ### 1. Clone the Repo and Install Dependencies
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/political-party-management.git
-cd political-party-management
+git clone https://github.com/avturas/parti-admin.git
+cd parti-admin
 npm install
 ```
 
