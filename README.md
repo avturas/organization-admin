@@ -1,27 +1,96 @@
-# Parti Yönetim
+# 🏛️ Political Party Management Platform
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 17.3.7.
+**Role-based management system for political organizations**  
+Built with Angular 20 and Firebase, this platform supports structured document sharing, announcements, and organizational workflows with secure, scalable access control.
 
-## Development server
+---
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The application will automatically reload if you change any of the source files.
+## 🚀 Features
 
-## Code scaffolding
+- 🔐 Firebase Phone Authentication with custom claims
+- 🧾 Role-based access control for users (headquarters, city, district)
+- 📢 Announcements with audience-based visibility (`everyone`, `city`, `district`, etc.)
+- 🗂️ Document storage and permission-based access
+- 📅 Event and committee management
+- 🌐 Built with Angular 20 + Angular Material UI
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+---
 
-## Build
+## 🧱 Tech Stack
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory.
+| Layer    | Tech                                            |
+| -------- | ----------------------------------------------- |
+| Frontend | Angular 20, Angular Material                    |
+| Backend  | Firebase (Firestore, Storage, Functions)        |
+| Auth     | Firebase Authentication (Phone + Custom Claims) |
+| Hosting  | Not deployed yet                                |
 
-## Running unit tests
+---
 
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
+## 📂 Folder Structure
 
-## Running end-to-end tests
+```
+firebase/
+  rules/
+    firestore.rules     # Firestore access logic
+    storage.rules       # Cloud Storage access logic
+src/
+  app/
+    ...                 # Angular application code
+.gitignore
+LICENSE
+README.md
+.firebaserc.example
+firebase.json.example
+```
 
-Run `ng e2e` to execute the end-to-end tests via a platform of your choice. To use this command, you need to first add a package that implements end-to-end testing capabilities.
+---
 
-## Further help
+## 🛠️ Getting Started
 
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI Overview and Command Reference](https://angular.io/cli) page.
+### 1. Clone the Repo and Install Dependencies
+
+```bash
+git clone https://github.com/YOUR_USERNAME/political-party-management.git
+cd political-party-management
+npm install
+```
+
+### 2. Setup Firebase Config
+
+```bash
+cp .firebaserc.example .firebaserc
+cp firebase.json.example firebase.json
+```
+
+Then update `.firebaserc` with your Firebase project ID.
+
+### 3. Start the App
+
+```bash
+npm start
+```
+
+---
+
+## 🔐 Firebase Rules
+
+All Firebase rules are located under the `/firebase/rules/` folder:
+
+- `firestore.rules`: Document-based security model with hierarchical access
+- `storage.rules`: File access control using metadata (`audienceType`, `city`, `district`, etc.)
+
+These rules enforce strict role-based access for all operations.
+
+---
+
+## 🧾 License
+
+This project is licensed under the **MIT License**.  
+See the [LICENSE](./LICENSE) file for full license text.
+
+---
+
+## 🌐 Maintained by
+
+**AVTURAS** – open political infrastructure for the future.
