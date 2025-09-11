@@ -1,0 +1,19 @@
+interface EnvironmentType {
+  production: boolean;
+  projectId: string;
+  appId: string;
+  storageBucket: string;
+  apiKey: string;
+  authDomain: string;
+  messagingSenderId: string;
+}
+
+export const environment: EnvironmentType = {
+  production: false,
+  apiKey: '',
+  authDomain: '',
+  projectId: '',
+  storageBucket: '',
+  messagingSenderId: '',
+  appId: '',
+};
