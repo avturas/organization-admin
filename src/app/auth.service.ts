@@ -23,7 +23,7 @@ import { getFunctions, httpsCallable } from '@angular/fire/functions';
 export class AuthService {
   private auth = getAuth();
   private firestore: Firestore = getFirestore();
-  private recaptchaVerifier!: RecaptchaVerifier;
+  private recaptchaVerifier!: RecaptchaVerifier | null;
   private confirmationResult: any;
 
   user: User | null = null;
@@ -150,6 +150,9 @@ export class AuthService {
   }
 
   async sendOtp(phoneNumber: string): Promise<void> {
+    if (!this.recaptchaVerifier) {
+      throw new Error('Recaptcha not initialized');
+    }
     try {
       this.confirmationResult = await signInWithPhoneNumber(
         this.auth,
@@ -254,11 +257,18 @@ export class AuthService {
   }
 
   initializeRecaptcha(containerId: string): void {
-    this.recaptchaVerifier = new RecaptchaVerifier(this.auth, containerId, {
-      size: 'invisible',
-      callback: (response: any) => {
-        console.log('reCAPTCHA solved');
-      },
-    });
+    if (!this.recaptchaVerifier) {
+      this.recaptchaVerifier = new RecaptchaVerifier(this.auth, containerId, {
+        size: 'invisible',
+        callback: (response: any) => {},
+      });
+    }
+  }
+
+  destroyRecaptcha() {
+    if (this.recaptchaVerifier) {
+      this.recaptchaVerifier.clear();
+      this.recaptchaVerifier = null;
+    }
   }
 }

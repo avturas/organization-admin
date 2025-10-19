@@ -1,9 +1,10 @@
 <mat-toolbar>
-  Parti Yönetim
+  Organizasyon Yönetim
   <span class="example-spacer"></span>
 </mat-toolbar>
+<mat-progress-bar *ngIf="isLoading" mode="indeterminate"></mat-progress-bar>
 <mat-card class="signInCard">
-  <mat-card-title> Parti Yönetim </mat-card-title>
+  <mat-card-title> Organizasyon Yönetim </mat-card-title>
   <mat-card-content>
     <div id="recaptcha-container"></div>
     <div class="signInForm">
@@ -23,7 +24,9 @@
         <button
           type="submit"
           (click)="sendOtp()"
-          [disabled]="otpSent || !phoneNumber || phoneNumber.length !== 10"
+          [disabled]="
+            otpSent || !phoneNumber || phoneNumber.length !== 10 || isLoading
+          "
           mat-button
         >
           Şifre Gönder
@@ -49,7 +52,7 @@
           (click)="verifyOtp()"
           type="submit"
           mat-button
-          [disabled]="!otpSent"
+          [disabled]="!otpSent || isLoading"
         >
           Giriş Yap
         </button>
