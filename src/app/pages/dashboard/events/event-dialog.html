@@ -1,3 +1,4 @@
+<mat-progress-bar *ngIf="isLoading" mode="indeterminate"></mat-progress-bar>
 <mat-dialog-content>
   <form [formGroup]="eventForm">
     <mat-form-field appearance="fill">
@@ -42,7 +43,6 @@
       <mat-label>Etkinlik Adı</mat-label>
       <input matInput formControlName="name" />
     </mat-form-field>
-
     <mat-form-field appearance="fill">
       <mat-label>Etkinlik Tipi</mat-label>
       <mat-select formControlName="eventType">
@@ -99,8 +99,6 @@
       <mat-label>Mekan</mat-label>
       <input matInput formControlName="place" />
     </mat-form-field>
-
-    <!-- Purpose -->
     <mat-form-field appearance="fill">
       <mat-label>Amaç</mat-label>
       <input matInput formControlName="purpose" />
@@ -117,6 +115,8 @@
       <mat-label>Önemli Katılımcılar</mat-label>
       <input matInput formControlName="importantParticipants" />
     </mat-form-field>
+
+    <!-- Purpose -->
 
     <!-- Focus Group -->
     <mat-form-field appearance="fill">
@@ -150,6 +150,7 @@
 
     <div class="file-input-wrapper">
       <button
+        [disabled]="isLoading || readonlyMode"
         mat-raised-button
         class="file-input-label"
         (click)="triggerFileInput()"
@@ -172,7 +173,9 @@
     </div>
 
     <div *ngIf="data.event.imageUrl && !imagePreview" class="image-preview">
-      <img [src]="data.event.imageUrl" alt="Selected Image" />
+      <a [href]="data.event.imageUrl" target="_blank" rel="noopener noreferrer">
+        <img [src]="data.event.imageUrl" alt="Selected Image" />
+      </a>
     </div>
   </form>
 </mat-dialog-content>
@@ -183,7 +186,7 @@
     mat-button
     (click)="onSubmit()"
     cdkFocusInitial
-    [disabled]="eventForm.invalid"
+    [disabled]="eventForm.invalid || isLoading"
   >
     Kaydet
   </button>

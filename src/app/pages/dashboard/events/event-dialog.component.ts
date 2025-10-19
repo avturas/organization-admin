@@ -31,6 +31,7 @@ import { DISTRICTS } from '../../../shared/districts';
 import { MatIconModule } from '@angular/material/icon';
 
 import { collection, doc, getFirestore } from '@angular/fire/firestore';
+import { MatProgressBarModule } from '@angular/material/progress-bar';
 
 export interface EventData {
   id?: string;
@@ -73,6 +74,7 @@ const EVENT_TYPE_OWNER_TEXT = {
     MatDatepickerModule,
     MatNativeDateModule,
     MatIconModule,
+    MatProgressBarModule,
   ],
   templateUrl: './event-dialog.html',
   styleUrls: ['./event-dialog.scss'],
@@ -91,6 +93,7 @@ export class EventDialogComponent implements OnInit {
   showDistrictField = false;
   selectedFile: File | null = null;
   imagePreview: string | null = null;
+  isLoading = false;
   uploadProgress: number | null | undefined = null;
   @ViewChild('fileInput') fileInput!: ElementRef<HTMLInputElement>;
 
@@ -222,6 +225,7 @@ export class EventDialogComponent implements OnInit {
 
   async onSubmit(): Promise<void> {
     if (this.eventForm.valid) {
+      this.isLoading = true;
       const oldImageUrl = this.data?.event?.imageUrl;
       if (this.selectedFile) {
         const storage = getStorage();
@@ -258,6 +262,7 @@ export class EventDialogComponent implements OnInit {
               (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
           },
           (error) => {
+            this.isLoading = false;
             console.error('File upload error:', error);
           },
           async () => {
