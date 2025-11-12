@@ -1,6 +1,6 @@
-# 🏛️ Political Party Management Platform
+# 🏛️ Organization Management Platform
 
-**Role-based management system for political organizations**  
+**Role-based management system for organizations**  
 Built with Angular 20 and Firebase, this platform supports structured document sharing, announcements, and organizational workflows with secure, scalable access control.
 
 ---
