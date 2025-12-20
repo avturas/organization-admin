@@ -63,12 +63,7 @@
 <hr />
 
 <div class="documents-table">
-  <table
-    mat-table
-    [dataSource]="dataSource"
-    class="mat-elevation-z8"
-    *ngIf="dataSource.data.length > 0"
-  >
+  <table mat-table [dataSource]="dataSource" *ngIf="dataSource.data.length > 0">
     <ng-container matColumnDef="fileName">
       <th mat-header-cell *matHeaderCellDef>Dosya Adı</th>
       <td mat-cell *matCellDef="let element">{{ element.fileName }}</td>
