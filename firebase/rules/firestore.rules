@@ -64,15 +64,15 @@ service cloud.firestore {
   // ====================
 
   function isHeadquarters() {
-    return request.auth.token.role == 'headquarters';
+    return request.auth != null && request.auth.token.role == 'headquarters';
   }
 
   function isCity() {
-    return request.auth.token.role == 'city';
+    return request.auth != null && request.auth.token.role == 'city';
   }
 
   function isDistrict() {
-    return request.auth.token.role == 'district';
+    return request.auth != null && request.auth.token.role == 'district';
   }
 
   function isSameCity(data) {

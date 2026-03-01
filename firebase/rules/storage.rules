@@ -4,9 +4,11 @@ service firebase.storage {
   match /b/{bucket}/o {
 
     match /events/{eventId}/{fileName} {
-      
-      // Upload (write/create): check incoming metadata
-      allow write: if isAuthorizedToWrite();
+
+      // Upload (write/create): check incoming metadata, file size, and content type
+      allow write: if isAuthorizedToWrite() &&
+                      isValidFileSize() &&
+                      isValidContentType();
 
       // Download/delete (read/delete): check existing metadata
       allow read, delete: if isAuthorizedToRead();
@@ -14,7 +16,9 @@ service firebase.storage {
     
         // ----- Documents -----
     match /documents/{fileName} {
-      allow write: if isAuthorizedToWrite();
+      allow write: if isAuthorizedToWrite() &&
+                      isValidFileSize() &&
+                      isValidContentType();
       allow read, delete: if isAuthorizedToRead();
     }
 
@@ -36,6 +40,7 @@ service firebase.storage {
 
         (request.auth.token.role == 'district' &&
           request.resource.metadata.audienceType == 'district' &&
+          request.resource.metadata.city == request.auth.token.city &&
           request.resource.metadata.district == request.auth.token.district)
       );
     }
@@ -60,8 +65,23 @@ service firebase.storage {
 
         (request.auth.token.role == 'district' &&
           resource.metadata.audienceType == 'district' &&
+          resource.metadata.city == request.auth.token.city &&
           resource.metadata.district == request.auth.token.district)
       );
+    }
+
+    // File size limit: 10MB
+    function isValidFileSize() {
+      return request.resource.size <= 10 * 1024 * 1024;
+    }
+
+    // Allow common file types for events and documents
+    function isValidContentType() {
+      return request.resource.contentType.matches('image/.*') ||
+             request.resource.contentType.matches('application/pdf') ||
+             request.resource.contentType.matches('application/msword') ||
+             request.resource.contentType.matches('application/vnd.openxmlformats-officedocument.*') ||
+             request.resource.contentType.matches('text/.*');
     }
 
   }
